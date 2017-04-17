@@ -1,0 +1,274 @@
+﻿@model IndividualLogins.Models.SearchFilters
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.15.0/jquery.validate.min.js"></script>
+@*<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>*@
+@section Scripts{
+    <script>
+        function StopLoading() {
+            $('form input, form select, form button').attr("disabled", false);
+            $("#divLoading").html("");
+        }
+
+        function StartLoading() {
+            $('form input, form select, form button').attr("disabled", true);
+            $("#divLoading").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
+        }
+        @*$(document).ready(function () {
+            $('form').submit(function () {
+                $.ajax({
+                    url: '@Url.Action("GetResultFileName")',
+                    type: "POST",
+                    data: $('form').serialize(),
+                    success: function (result) {
+                        StopLoading();
+                        console.log(result);
+                        window.open(result, '');
+                        return false;
+                    },
+                    error: function (result) {
+                        StopLoading();
+                        alert("Failed");
+                    }
+                });
+                StartLoading();
+                return false;
+            });
+            $('button').click(function () {
+                $('form').submit();
+            });
+        });*@
+        $(document).ready(function () {
+            $('button').click(function () {
+                $.ajax({
+                    url: '@Url.Action("GetResultFileName")',
+                    type: "POST",
+                    data: $('form').serialize(),
+                    success: function (result) {
+                        StopLoading();
+                        console.log(result);
+                        if (navigator.userAgent.indexOf("Chrome") != -1){
+                            console.log('Chrome');
+                            var popup = window.open("about:blank", "My Page"); 
+                            popup.location = result;
+                        }
+                        else {
+                            window.open(window.location + result, '_blank');
+                        }
+                        return false;
+                    },
+                    error: function (result) {
+                        StopLoading();
+                        alert("Failed");
+                    }
+                });
+                StartLoading();
+                return false;
+            });
+        });
+    </script>
+    <script>
+        function AddDays(date, addDays) {
+            var dat = new Date(date.valueOf());
+            dat.setDate(dat.getDate() + addDays);
+            return dat;
+        }
+        function GetDateFromString(dateStr) {
+            var date = dateStr.split('-');
+            var newDate = new Date(date[2], date[1] - 1, date[0]);
+            return newDate;
+        }
+
+        function DateToString(date) {
+            var dat = new Date(date.valueOf());
+            var dd = date.getDate();
+            var mm = date.getMonth(); //January is 0!
+            var yyyy = date.getFullYear();
+            return AddZero(dd) + '-' + AddZero(mm + 1) + '-' + yyyy;
+        }
+
+        function AddZero(number) {
+            if (number < 10) {
+                return '0' + number;
+            }
+            else
+                return number;
+        }
+
+        function LoadLocations() {
+            var locations = $('#Location');
+            $.getJSON('@Url.Action("GetLocations")', { country: $('#Country').val() }, function (response) {
+                locations.empty(); // remove any existing options
+                $.each(response, function (index, item) {
+                    locations.append(('<option value=' + item.Value + '>' + item.Text + '</option>'));
+                });
+            });
+            return false;
+        }
+
+
+        function LoadSourcesStatic() {
+            var sources = $('#Source');
+            var sourceList = ["Rental Cars", "Car Trawler", "Car Scanner", "Atlas Choise"];
+            $.each(sourceList, function (index, item) {
+                sources.append(('<option value=' + parseInt(index + 1) + '>' + item + '</option>'));
+            });
+        }
+
+        $(document).ready(function () {
+            LoadLocations();
+            $('#Country').change(function () {
+                LoadLocations();
+            });
+
+            $('#PuDate').datetimepicker({
+                format: 'DD-MM-YYYY',
+                minDate: AddDays(new Date(), -1)
+            })
+
+            $('#DoDate').datetimepicker({
+                format: 'DD-MM-YYYY',
+                minDate: AddDays(new Date(), 1)
+            });
+
+            $('#PuDate').val(DateToString(AddDays(new Date(), 1)));
+            $('#DoDate').val(DateToString(AddDays(GetDateFromString($("#PuDate").val()), 1)));
+
+            $("#PuDate").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#PuDate").val()).getTime())) {
+                    $('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    $('#DoDate').val(DateToString(AddDays(GetDateFromString($("#PuDate").val()), 1)));
+                    $(this).datepicker('hide');
+                }
+            });
+
+            $('#DoTime').datetimepicker({
+                format: 'HH:mm',
+                stepping: 15
+            });
+
+            $('#PuTime').datetimepicker({
+                format: 'HH:mm',
+                stepping: 15
+            });
+
+            $("#DoTime").val("10:00");
+            $("#PuTime").val("10:00");
+
+            $.validator.addMethod("laterThanToday", function (value, e, date1) {
+                var date = value.split('-');
+                var time = $("#PuTime").val().split(':');
+                return new Date(date[2], date[1] - 1, date[0]) >= date1;
+            });
+
+
+            $("form").validate({
+                rules: {
+                    PuDate: {
+                        required: true,
+                        laterThanToday: new Date()
+                    },
+                    DoDate: {
+                        required: true
+                    },
+                    PuTime: {
+                        required: true
+                    },
+                    DoTime: {
+                        required: true
+                    }
+                },
+                messages: {
+                    PuDate: {
+                        required: "Pick up date is required",
+                        laterThanToday: "Pick up date cannot be earlier than now date"
+                    },
+                    PuTime: {
+                        required: "Pick up time is required"
+                    },
+                    DoDate: {
+                        required: "Drop off date is required"
+                    },
+                    DoTime: {
+                        required: "Drop off time is required"
+                    }
+                },
+                errorElement: 'div',
+                errorLabelContainer: '#errorDiv'
+            });
+        });
+    </script>
+}
+<h2>@ViewBag.Message</h2>
+<div class="container col-md-offset-4" style="background: rgba(51, 51, 51, 0.6); margin-top: 0px; padding: 40px; padding-bottom: 0px; max-width: 500px; min-width: 280px">
+    <div class="col-md-12" id="errorDiv">
+        @Html.ValidationMessageFor(model => model.PuDate)
+        @Html.ValidationMessageFor(model => model.PuTime)
+        @Html.ValidationMessageFor(model => model.DoDate)
+        @Html.ValidationMessageFor(model => model.DoTime)
+        @Html.ValidationMessageFor(model => model.Source)
+        @Html.ValidationMessageFor(model => model.Country)
+        @Html.ValidationMessageFor(model => model.Location)
+    </div>
+    @using (Html.BeginForm("SearchFilterPartial"))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="form-group row">
+            <div class="form-group col-md-6">
+                @Html.LabelFor(model => model.Source, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Source, new SelectList(ViewBag.Sources, "Value", "Text", 0), new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="form-group col-md-6">
+                @Html.LabelFor(model => model.Country, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Country, new SelectList(ViewBag.Countries, "Value", "Text", 0), new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(model => model.Location, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Location, new SelectList(ViewBag.Countries, "Value", "Text", 0), "Please select", new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Pick-up date:</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class=" glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBoxFor(m => m.PuDate, new { @class = "form-control", style = "padding:5px;width: 90px;" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-2">
+                <label class="control-label control-label-custom"></label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    @Html.TextBoxFor(m => m.PuTime, new { @class = "form-control form-fixer", style = "width: 50px;" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Pick-up date:</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class=" glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBoxFor(m => m.DoDate, new { @class = "form-control", style = "padding:5px;width: 90px;" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-2">
+                <label class="control-label control-label-custom"></label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    @Html.TextBoxFor(m => m.DoTime, new { @class = "form-control form-fixer", style = "width: 50px;" })
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group col-lg-offset-4 col-md-10">
+            <button type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300">
+                Start<span id="divLoading" style="margin-left: 5px;"></span>
+            </button>
+        </div>
+    }
+</div>

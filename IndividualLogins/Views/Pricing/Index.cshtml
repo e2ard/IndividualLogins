@@ -1,0 +1,457 @@
+﻿@using IndividualLogins.Models
+@model PricingModel
+@{
+    ViewBag.Title = "Pricing Tool";
+}
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<h2>Pricing</h2>
+
+@section Scripts{
+    <script>
+        function StopLoading() {
+            $('form input, form select, form button').attr("disabled", false);
+            $(".divLoading").html("");
+            $("#divLoadingExcel").html("");
+
+            var currentDate = new Date();
+            currentDate.setTime(currentDate.getTime() + 5 * 60 * 1000);
+
+            $("#nextUpdate").text("Next update: " + currentDate.toLocaleString());
+        }
+
+        function StartLoading(pdf) {
+            $('form input, form select, form button').attr("disabled", true);
+            $("#nextUpdate").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
+
+            if (pdf)
+                $(".adivLoadingExcel").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
+            else
+                $("#adivLoadingExcel").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
+        }
+        
+        $(document).ready(function () {
+            $('.ratesBtn').click(function (){
+                $("#PuDate").val($('#puDate' + $(this).val()).val());
+                $("#DoDate").val($('#doDate' + $(this).val()).val());
+                $("#IntervalNum").val($(this).val());
+                Generate();
+            });
+
+            function Generate() {
+                if ($('form').valid()) {
+                    var selectedValues = [];
+                    $('#Classes input:checked').each(function () {
+                        selectedValues.push($(this).val());
+                    });
+
+                    $.ajax({
+                        url: '@Url.Action("GeneratePrices")',
+                        type: "POST",
+                        data: {
+                            "PuDate": $('#PuDate').val(),
+                            "DoDate": $('#DoDate').val(),
+                            "PuTime": $('#PuTime').val(),
+                            "DoTime": $('#DoTime').val(),
+                            "IntervalNum": $('#IntervalNum').val(),
+                            "Source": $('#Source').val(),
+                            "Location": $('#Location').val(),
+                            "ApplyToAll": $("#ApplyToAll").is(':checked'),
+                            "Classes": JSON.stringify(selectedValues)
+                        },
+                        success: function (result) {
+                            StopLoading();
+                            console.log(result);
+
+                            console.log("Source" + $("#Source").val())
+                            console.log("Location" + $("#Location").val())
+                            console.log("Pu" + $("#PuDate").val())
+                            console.log("Do" + $("#DoDate").val())
+
+                            console.log("Interval num" +$("#IntervalNum").val())
+                            console.log("Apply to all" + $("#ApplyToAll").is(':checked'))
+
+                            console.log("mini" + $('[value=MiniM]').is(':checked'))
+                            console.log("eco m" + $('[value=EconomyM]').is(':checked'))
+                            console.log("eco a" + $('[value=EconomyA]').is(':checked'))
+
+                            if (result.length > 0)
+                                window.open(result, '_blank');
+                            return false;
+                        },
+                        error: function (result) {
+                            StopLoading();
+                            alert("Failed");
+                            return false;
+                        }
+                    });
+                    StartLoading(true);
+                    return false;
+                }
+            };
+
+            $('.datesBtn').click(function InitDates() {
+                $("#PuDate").val($('#puDate' + $(this).val()).val());
+                $("#DoDate").val($('#doDate' + $(this).val()).val());
+                $("#IntervalNum").val($(this).val());
+
+                if ($('form').valid()) {
+                    var selectedValues = [];
+                    $('#Classes input:checked').each(function () {
+                        selectedValues.push($(this).val());
+                    });
+
+                    $.ajax({
+                        url: '@Url.Action("InitiateDates")',
+                        type: "POST",
+                        data: {
+                            "PuDate": $('#PuDate').val(),
+                            "DoDate": $('#DoDate').val(),
+                            "PuTime": $('#PuTime').val(),
+                            "DoTime": $('#DoTime').val(),
+                            "IntervalNum": $('#IntervalNum').val(),
+                            "Source": $('#Source').val(),
+                            "Location": $('#Location').val(),
+                            "Classes": JSON.stringify(selectedValues),
+                            "ApplyToAll": $("#ApplyToAll").is(':checked')
+                        },
+                        success: function (result) {
+                            console.log(result);
+                            StopLoading();
+
+                            if (result.length > 0)
+                                window.open(result, '_blank');
+                            return false;
+                        },
+                        error: function (result) {
+                            StopLoading();
+                            alert("Failed");
+                            return false;
+                        }
+                    });
+                    StartLoading(true);
+                    return false;
+                }
+            });
+        });
+
+        function AddDays(date, addDays) {
+            var dat = new Date(date.valueOf());
+            dat.setDate(dat.getDate() + addDays);
+            return dat;
+        }
+
+        function GetDateFromString(dateStr) {
+            var date = dateStr.split('-');
+            var newDate = new Date(date[2], date[1] - 1, date[0]);
+            return newDate;
+        }
+
+        function DateToString(date) {
+            var dat = new Date(date.valueOf());
+            var dd = date.getDate();
+            var mm = date.getMonth(); //January is 0!
+            var yyyy = date.getFullYear();
+            return AddZero(dd) + '-' + AddZero(mm + 1) + '-' + yyyy;
+        }
+
+        function AddZero(number) {
+            if (number < 10) {
+                return '0' + number;
+            }
+            else
+                return number;
+        }
+
+        function LoadLocations() {
+            var locations = $('#Location');
+            $.getJSON('@Url.Action("GetLocations")', { country: $('#Country').val() }, function (response) {
+                locations.empty(); // remove any existing options
+                $.each(response, function (index, item) {
+                    locations.append(('<option value=' + item.Value + '>' + item.Text + '</option>'));
+                });
+            });
+            return false;
+        }
+
+        function LoadSourcesStatic() {
+            var sources = $('#Source');
+            var sourceList = ["Rental Cars", "Car Trawler", "Car Scanner", "Atlas Choise"];
+            $.each(sourceList, function (index, item) {
+                sources.append(('<option value=' + parseInt(index + 1) + '>' + item + '</option>'));
+            });
+        }
+
+        
+        $(document).ready(function () {
+            $('#Country').val("2");
+            LoadLocations();
+            $('#Country').change(function () {
+                LoadLocations();
+            });
+
+            $('#puDate1, #puDate2, #puDate3').datetimepicker({
+                format: 'DD-MM-YYYY',
+                minDate: AddDays(new Date(), -1)
+            })
+
+            $('#doDate1, #doDate2, #doDate3').datetimepicker({
+                format: 'DD-MM-YYYY',
+                minDate: AddDays(new Date(), 1)
+                //maxDate: AddDays(new Date(), 29)
+            });
+
+            $('#puDate1').val(DateToString(AddDays(new Date(), 1)));
+            $('#doDate1').val(DateToString(AddDays(new Date(), 7)));
+
+            $('#puDate2').val(DateToString(AddDays(new Date(), 7)));
+            $('#doDate2').val(DateToString(AddDays(new Date(), 16)));
+
+            $('#puDate3').val(DateToString(AddDays(new Date(), 16)));
+            $('#doDate3').val(DateToString(AddDays(new Date(), 23)));
+
+            $("#puDate1").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate1").val()).getTime())) {
+                    //$('#doDate1').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#puDate1").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#doDate1').val(DateToString(AddDays(GetDateFromString($("#puDate1").val()), 7)));
+                    $(this).datepicker('hide');
+                }
+            });
+
+            $("#puDate2").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate2").val()).getTime())) {
+                    //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#doDate2').val(DateToString(AddDays(GetDateFromString($("#puDate2").val()), 7)));
+
+                    $(this).datepicker('hide');
+                }
+            });
+
+            $("#puDate3").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate3").val()).getTime())) {
+                    //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#doDate3').val(DateToString(AddDays(GetDateFromString($("#puDate3").val()), 7)));
+                    $(this).datepicker('hide');
+                }
+            });
+
+            $("#doDate1").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate1").val()).getTime())) {
+                    //$('#doDate1').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#puDate1").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#puDate2').val(DateToString(AddDays(GetDateFromString($("#doDate1").val()), 0)));
+                    $(this).datepicker('hide');
+                }
+            });
+
+            $("#doDate2").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate2").val()).getTime())) {
+                    //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#puDate3').val(DateToString(AddDays(GetDateFromString($("#puDate3").val()), 0)));
+
+                    $(this).datepicker('hide');
+                }
+            });
+
+            $.validator.addMethod("laterThanToday", function (value, e, date1) {
+                var date = value.split('-');
+                var time = $("#PuTime").val().split(':');
+                return new Date(date[2], date[1] - 1, date[0], time[0], time[1]) >= date1;
+            });
+
+            $("form").validate({
+                rules: {
+                    PuDate: {
+                        required: true,
+                        laterThanToday: new Date()
+                    },
+                    DoDate: {
+                        required: true
+                    },
+                    PuTime: {
+                        required: true
+                    },
+                    DoTime: {
+                        required: true
+                    }
+                },
+                messages: {
+                    PuDate: {
+                        required: "Pick up date is required",
+                        laterThanToday: "Pick up date cannot be earlier than now date"
+                    },
+                    PuTime: {
+                        required: "Pick up time is required"
+                    },
+                    DoDate: {
+                        required: "Drop off date is required"
+                    },
+                    DoTime: {
+                        required: "Drop off time is required"
+                    }
+                },
+                errorElement: 'div',
+                errorLabelContainer: '#errorDiv'
+            });
+
+            $("#checkAll").on("click", function () {
+                $('.availableClasses').prop('checked', true);
+            })
+
+        });
+    </script>
+}
+<h2>@ViewBag.Message</h2>
+<div class="container" style="background: rgba(255, 50, 50, 0.6); margin-top: 0px; padding: 40px; padding-bottom: 0px; max-width: 520px; min-width: 280px">
+    <div class="col-md-12" id="errorDiv">
+        @Html.ValidationMessageFor(model => model.PuDate)
+        @Html.ValidationMessageFor(model => model.PuTime)
+        @Html.ValidationMessageFor(model => model.DoDate)
+        @Html.ValidationMessageFor(model => model.DoTime)
+        @Html.ValidationMessageFor(model => model.Source)
+        @Html.ValidationMessageFor(model => model.Location)
+        @Html.HiddenFor(m => m.IntervalNum)
+        @Html.HiddenFor(m => m.PuDate)
+        @Html.HiddenFor(m => m.DoDate)
+        @Html.HiddenFor(m => m.PuTime, new { @Value="10:30" })
+        @Html.HiddenFor(m => m.DoTime, new { @Value = "10:30" })
+    </div>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="form-group row">
+            
+        </div>
+
+        <div class="form-group row">
+            <div class="form-group col-md-5">
+                @Html.LabelFor(model => model.Source, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Source, new SelectList(ViewBag.Sources, "Value", "Text", 0), new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(model => model.Location, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Location, new SelectList(ViewBag.Locations, "Value", "Text", 0), new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBox("pickupDate1", null, new { @class = "form-control pickupDate", style = "padding:5px;", id="puDate1", @Value = "2017-10-15" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBox("dropoffDate1", null, new { @class = "form-control doDate", style = "padding:5px;", id = "doDate1",  @Value = "2017-10-23" })
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm ratesBtn" type='button' value="1" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set rates<span class="divLoading" style="margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-sm datesBtn" value="1" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set dates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBox("pickupDate2", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate2", @Value = "2017-10-15" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBox("dropoffDate2", null, new { @class = "form-control doDate", style = "padding:5px;", id = "doDate2", @Value = "2017-10-23" })
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm ratesBtn" type='button' value="2" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set rates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-sm datesBtn" value="2" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set dates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBox("pickupDate3", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate3", @Value = "2017-10-15" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBox("dropoffDate3", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate3", @Value = "2017-10-23" })
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm ratesBtn" type='button' value="3" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set rates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-sm datesBtn" value="3" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set dates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-12" id="Classes">
+                @foreach (var item in Model.AvailableClasses)
+                {
+                    <label>
+                        <input type="checkbox" class="availableClasses" value="@item.Value" /> @item.Value
+                    </label>
+                }
+            </div>
+
+            <div class="form-group input-group-md col-md-12">
+                @Html.CheckBoxFor(m => m.ApplyToAll, new { @checked = "false"/*, @Value="false"*/ })Apply to All
+            </div>
+
+            <div class="form-group input-group-md col-md-12">
+                @Html.CheckBox("checkAll", false)Check all
+            </div>
+            <div id="nextUpdate">
+                Next update: n/d
+            </div>
+        </div>
+
+        @*<div class="form-group col-lg-offset-2 col-md-10">
+            <button type="submit"id="pdfBtn" class="btn btn-lg btn-xlarge" style="background-color: #a9d300; width:130px">
+                Get PDF<span id="divLoading" style="margin-left: 5px;"></span>
+            </button>
+
+            <button id="DatesBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300;width:130px">
+                Initiate dates<span id="divLoadingExcel" style="margin-left: 5px;"></span>
+            </button>
+        </div>*@
+    }
+</div>
+
+

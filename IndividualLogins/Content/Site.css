@@ -1,5 +1,4 @@
 ﻿body {
-    padding-top: 50px;
     padding-bottom: 20px;
 }
 
@@ -21,4 +20,50 @@ input,
 select,
 textarea {
     max-width: 280px;
+}
+*{
+  border-radius: 0 !important;
+}
+
+.btn-xlarge {
+    padding: 15px 28px;
+    font-size: 22px;
+    font: bold;
+    line-height: normal;
+    -webkit-border-radius: 8px;
+       -moz-border-radius: 8px;
+            border-radius: 8px;
+}
+
+input.form-fixer {
+    padding: 5px;
+}
+.field-validation-error, .error {
+    color: #cc0000
+}
+
+.input-xs { /*augintiniai*/
+    padding:5px;
+}
+body {
+    background: rgba(0, 0, 0, 0) url("http://greenmotion.com/images/tracks.png") no-repeat;
+    height: auto;
+}
+.form-group label, .btn-xlarge{
+    color: #fff;
+    font: normal 16px sans-serif !important;
+}
+.bootstrap-datetimepicker-widget table td.active, .bootstrap-datetimepicker-widget table td.active:hover {
+    background-color: #a9d300 !important;
+    color: #ffffff;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.bootstrap-datetimepicker-widget table td.active,
+    .bootstrap-datetimepicker-widget table td.active:hover,
+    .bootstrap-datetimepicker-widget table td span.active {
+        background-color: #a9d300;
+    }
+    
+.bootstrap-datetimepicker-widget table td.today::before {
+    border-color: rgba(0, 0, 0, 0.2) transparent #a9d300 !important;
 }

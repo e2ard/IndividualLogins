@@ -1,31 +1,220 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿@model IndividualLogins.Models.SearchFilters
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Pricing Tool";
 }
+<script src="~/Scripts/jquery.validate.min.js"></script>
+@section Scripts{
+    <script>
+        function StopLoading() {
+            $('form input, form select, form button').attr("disabled", false);
+            $("#divLoading").html("");
+            $("#divLoadingExcel").html("");
+        }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+        function StartLoading(pdf) {
+            $('form input, form select, form button').attr("disabled", true);
+            if(pdf)
+                $("#divLoading").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
+            else
+                $("#divLoadingExcel").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+        }
+        $(document).ready(function () {
+            $('#pdfBtn').click(function () {
+                if ($('form').valid()){
+                    $.ajax({
+                        url: '@Url.Action("GetResultFileName")',
+                        type: "POST",
+                        data: $('form').serialize(),
+                        success: function (result) {
+                            StopLoading();
+                            if (result.length > 0)
+                                window.open(result, '_blank');
+                            return false;
+                        },
+                        error: function (result) {
+                            StopLoading();
+                            alert("Failed");
+                            return false;
+                        }
+                    });
+                    StartLoading(true);
+                    return false;
+                }
+            });
+        });
+    
+        function AddDays(date, addDays) {
+            var dat = new Date(date.valueOf());
+            dat.setDate(dat.getDate() + addDays);
+            return dat;
+        }
+
+        function GetDateFromString(dateStr) {
+            var date = dateStr.split('-');
+            var newDate = new Date(date[2], date[1] - 1, date[0]);
+            return newDate;
+        }
+
+        function DateToString(date) {
+            var dat = new Date(date.valueOf());
+            var dd = date.getDate();
+            var mm = date.getMonth(); //January is 0!
+            var yyyy = date.getFullYear();
+            return AddZero(dd) + '-' + AddZero(mm + 1) + '-' + yyyy;
+        }
+
+        function AddZero(number) {
+            if (number < 10) {
+                return '0' + number;
+            }
+            else
+                return number;
+        }
+
+        $(document).ready(function () {
+            
+            $('#PuDate').datetimepicker({
+                format: 'DD-MM-YYYY',
+                minDate: AddDays(new Date(), -1)
+            })
+
+            $('#DoDate').datetimepicker({
+                format: 'DD-MM-YYYY',
+                minDate: AddDays(new Date(), 1),
+                maxDate: AddDays(new Date(), 29)
+            });
+
+            $('#PuDate').val(DateToString(AddDays(new Date(), 1)));
+            $('#DoDate').val(DateToString(AddDays(GetDateFromString($("#PuDate").val()), 6)));
+
+            $("#PuDate").on("dp.change", function (e) {
+                var puDate = $("#PuDate").val();
+                $('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString(puDate), 29))
+                $('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString(puDate), 1));
+
+                //$('#DoDate').datetimepicker({
+                //    format: 'DD-MM-YYYY',
+                //    minDate: AddDays(GetDateFromString(puDate), 29),
+                //    maxDate: AddDays(GetDateFromString(puDate), 1)
+                //});
+                $('#DoDate').val(DateToString(AddDays(GetDateFromString(puDate), 6)));
+            });
+
+            $('#DoTime').datetimepicker({
+                format: 'HH:mm',
+                stepping: 15
+            });
+
+            $('#PuTime').datetimepicker({
+                format: 'HH:mm',
+                stepping: 15
+            });
+
+            $("#DoTime").val("10:00");
+            $("#PuTime").val("10:00");
+
+            $.validator.addMethod("laterThanToday", function (value, e, date1) {
+                var date = value.split('-');
+                var time = $("#PuTime").val().split(':');
+                return new Date(date[2], date[1] - 1, date[0], time[0], time[1]) >= date1;
+            });
+
+
+            $("form").validate({
+                rules: {
+                    PuDate: {
+                        required: true,
+                        laterThanToday: new Date()
+                    },
+                    DoDate: {
+                        required: true
+                    },
+                    PuTime: {
+                        required: true
+                    },
+                    DoTime: {
+                        required: true
+                    }
+                },
+                messages: {
+                    PuDate: {
+                        required: "Pick up date is required",
+                        laterThanToday: "Pick up date cannot be earlier than now date"
+                    },
+                    PuTime: {
+                        required: "Pick up time is required"
+                    },
+                    DoDate: {
+                        required: "Drop off date is required"
+                    },
+                    DoTime: {
+                        required: "Drop off time is required"
+                    }
+                },
+                errorElement: 'div',
+                errorLabelContainer: '#errorDiv'
+            });
+        });
+    </script>
+}
+<h2>@ViewBag.Message</h2>
+<div class="container" style="background: rgba(51, 51, 51, 0.6); margin-top: 0px; padding: 40px; padding-bottom: 0px; max-width: 500px; min-width: 280px">
+    <div class="col-md-12" id="errorDiv">
+        @Html.ValidationMessageFor(model => model.PuDate)
+        @Html.ValidationMessageFor(model => model.PuTime)
+        @Html.ValidationMessageFor(model => model.DoDate)
+        @Html.ValidationMessageFor(model => model.DoTime)
+        @Html.ValidationMessageFor(model => model.Source)
+        @Html.ValidationMessageFor(model => model.Location)
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="form-group row">
+            <div class="form-group col-md-6">
+                @Html.LabelFor(model => model.Source, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Source, new SelectList(ViewBag.Sources, "Value", "Text", 0), new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-md-6">
+                @Html.LabelFor(model => model.Location, new { @class = "control-label-custom" })
+                @Html.DropDownListFor(m => m.Location, new SelectList(ViewBag.Locations, "Value", "Text", 0), new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-6">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBoxFor(m => m.PuDate, new { @class = "form-control", style = "padding:5px;width: 90px;" })
+                    @Html.TextBoxFor(m => m.PuTime, new { @class = "form-control form-fixer", style = "width: 50px;" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-6">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBoxFor(m => m.DoDate, new { @class = "form-control", style = "padding:5px;width: 90px;" })
+                    @Html.TextBoxFor(m => m.DoTime, new { @class = "form-control form-fixer", style = "width: 50px;" })
+                </div>
+            </div>
+
+           
+        </div>
+
+        <div class="form-group col-md-12">
+            <button id="pdfBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300; width:130px">
+                Get PDF<span id="divLoading" style="margin-left: 5px;"></span>
+            </button>
+
+            @*<a href="@Url.Action("ExcelPackageCreate")" id="excelBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300;width:130px">
+                Get EXCEL<span id="divLoadingExcel" style="margin-left: 5px;"></span>
+            </a>*@
+        </div>
+    }
 </div>
