@@ -7,12 +7,14 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
 
 </head>
 <body>
    @if (User.IsInRole("Preview") || User.IsInRole("Edit") || User.IsInRole("Admin"))
    {
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -44,7 +46,7 @@
         </div>
     </div>
    }
-    <div class="container body-content">
+    <div class="container body-content" style="padding-bottom:50px">
         @RenderBody()
         @*<hr />
     <footer>
@@ -52,7 +54,6 @@
     </footer>*@
     </div>
 
-    @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 </body>
 </html>

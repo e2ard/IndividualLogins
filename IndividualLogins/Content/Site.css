@@ -46,7 +46,7 @@ input.form-fixer {
     padding:5px;
 }
 body {
-    background: rgba(0, 0, 0, 0) url("http://greenmotion.com/images/tracks.png") no-repeat;
+    /*background: rgba(0, 0, 0, 0) url("http://greenmotion.com/images/tracks.png") no-repeat;*/
     height: auto;
 }
 .form-group label, .btn-xlarge{

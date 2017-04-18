@@ -2,10 +2,8 @@
 @model PricingModel
 @{
     ViewBag.Title = "Pricing Tool";
+    Layout = "/Views/Shared/_Layout.cshtml";
 }
-<script src="~/Scripts/jquery.validate.min.js"></script>
-<h2>Pricing</h2>
-
 @section Scripts{
     <script>
         function StopLoading() {
@@ -214,7 +212,7 @@
                     //$('#doDate1').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#puDate1").val()), 1));
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
                     $('#doDate1').val(DateToString(AddDays(GetDateFromString($("#puDate1").val()), 7)));
-                    $(this).datepicker('hide');
+                    //$(this).datepicker('hide');
                 }
             });
 
@@ -224,7 +222,7 @@
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
                     $('#doDate2').val(DateToString(AddDays(GetDateFromString($("#puDate2").val()), 7)));
 
-                    $(this).datepicker('hide');
+                    //$(this).datepicker('hide');
                 }
             });
 
@@ -233,7 +231,7 @@
                     //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
                     $('#doDate3').val(DateToString(AddDays(GetDateFromString($("#puDate3").val()), 7)));
-                    $(this).datepicker('hide');
+                    //$(this).datepicker('hide');
                 }
             });
 
@@ -242,7 +240,7 @@
                     //$('#doDate1').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#puDate1").val()), 1));
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
                     $('#puDate2').val(DateToString(AddDays(GetDateFromString($("#doDate1").val()), 0)));
-                    $(this).datepicker('hide');
+                    //$(this).datepicker('hide');
                 }
             });
 
@@ -252,7 +250,7 @@
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
                     $('#puDate3').val(DateToString(AddDays(GetDateFromString($("#puDate3").val()), 0)));
 
-                    $(this).datepicker('hide');
+                    //$(this).datepicker('hide');
                 }
             });
 
@@ -304,8 +302,7 @@
         });
     </script>
 }
-<h2>@ViewBag.Message</h2>
-<div class="container" style="background: rgba(255, 50, 50, 0.6); margin-top: 0px; padding: 40px; padding-bottom: 0px; max-width: 520px; min-width: 280px">
+<div class="container" style="background: rgba(51, 51, 51, 0.6); margin-top: 70px; padding: 40px; padding-bottom: 0px; max-width: 520px; min-width: 280px">
     <div class="col-md-12" id="errorDiv">
         @Html.ValidationMessageFor(model => model.PuDate)
         @Html.ValidationMessageFor(model => model.PuTime)
@@ -323,10 +320,6 @@
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true)
-        <div class="form-group row">
-            
-        </div>
-
         <div class="form-group row">
             <div class="form-group col-md-5">
                 @Html.LabelFor(model => model.Source, new { @class = "control-label-custom" })
