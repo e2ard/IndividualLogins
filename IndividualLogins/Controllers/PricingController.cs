@@ -15,51 +15,24 @@ namespace IndividualLogins.Controllers
     public class PricingController : Controller
     {
         List<PricingClass> allClasses;
+        PricingToolDal dal = new PricingToolDal();
 
         public PricingController()
         {
             allClasses = AllClasses();
         }
         // GET: Pricing
+        [Authorize(Roles = "Admin, Edit")]
         public ActionResult Index()
         {
-            ViewBag.Locations = GetLocations();
-            ViewBag.Sources = new PricingToolDal().GetSources();
+            ViewBag.Locations = dal.GetLocations();
+            ViewBag.Sources = dal.GetSources();
             PricingModel pm = new PricingModel();
             pm.AvailableClasses = GetClasses();
             return View(pm);
         }
 
-        public IEnumerable<SelectListItem> GetLocations()
-        {
-
-            //using (Rates1 ctx = new Rates1())
-            {
-                List<SelectListItem> sl = new List<SelectListItem>();
-                sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Modlin)", Value = "9" });
-                //foreach (Models.Location l in ctx.Locations1)
-                //{
-                //    sl.Add(new SelectListItem { Selected = false, Text = l.Name, Value = l.Id.ToString() });
-                //}
-                return new SelectList(sl, "Value", "Text");
-            }
-                
-            //sl.Add(new SelectListItem { Selected = false, Text = "Gdansk", Value = "12" });
-            //sl.Add(new SelectListItem { Selected = true, Text = "Riga", Value = "3" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Kaunas", Value = "2" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Krakow", Value = "11" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Chopin)", Value = "4" });
-            
-            //sl.Add(new SelectListItem { Selected = false, Text = "London", Value = "5" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Fiumicino", Value = "6" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Rome", Value = "7" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Bologna", Value = "8" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Prague", Value = "10" });
-
-
-            
-        }
+        [Authorize(Roles = "Admin, Edit")]
         public string GeneratePrices(PricingModel searchFilters)
         {
             if (ModelState.IsValid)
@@ -72,6 +45,7 @@ namespace IndividualLogins.Controllers
                 return "";
         }
 
+        [Authorize(Roles = "Admin, Edit")]
         public string InitiateDates(PricingModel searchFilters)
         {
             if (ModelState.IsValid)
@@ -90,9 +64,9 @@ namespace IndividualLogins.Controllers
         {
             List<SelectListItem> selectList = new List<SelectListItem>();
 
-            foreach (string s in AllClasses().Select(s => s.ClassName).Distinct())
+            foreach (PricingClass s in AllClasses().Take(5))
             {
-                selectList.Add(new SelectListItem { Text = s, Value = s });
+                selectList.Add(new SelectListItem { Text = s.PublicName, Value = s.ClassName });
             }
             return selectList;
         }
@@ -100,21 +74,44 @@ namespace IndividualLogins.Controllers
         private List<PricingClass> AllClasses()
         {
             allClasses = new List<PricingClass>();
+            //--Modlin 1
             allClasses.Add(new PricingClass("MCMR", "MiniM", "296333", 9, 1));
             allClasses.Add(new PricingClass("EDMR", "EconomyM", "296335", 9, 1));
             allClasses.Add(new PricingClass("EDAR", "EconomyA", "296337", 9, 1));
             allClasses.Add(new PricingClass("CDMR", "CompactM", "307349", 9, 1));
             allClasses.Add(new PricingClass("CDAR", "CompactA", "307352", 9, 1));
+            //--Modlin 2
             allClasses.Add(new PricingClass("MCMR", "MiniM", "296332", 9, 2));
             allClasses.Add(new PricingClass("EDMR", "EconomyM", "296334", 9, 2));
             allClasses.Add(new PricingClass("EDAR", "EconomyA", "296336", 9, 2));
             allClasses.Add(new PricingClass("CDMR", "CompactM", "307350", 9, 2));
             allClasses.Add(new PricingClass("CDAR", "CompactA", "307353", 9, 2));
+            //--Modlin 3
             allClasses.Add(new PricingClass("MCMR", "MiniM", "295233", 9, 3));
             allClasses.Add(new PricingClass("EDMR", "EconomyM", "295235", 9, 3));
             allClasses.Add(new PricingClass("EDAR", "EconomyA", "295234", 9, 3));
             allClasses.Add(new PricingClass("CDMR", "CompactM", "307351", 9, 3));
             allClasses.Add(new PricingClass("CDAR", "CompactA", "307355", 9, 3));
+
+            //--VIlnius 1
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "310881", 1, 1));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "310891", 1, 1));
+            allClasses.Add(new PricingClass("EDAR", "EconomyA", "311206", 1, 1));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "311226", 1, 1));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "311236", 1, 1));
+            ////--Vilnius 2
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "310886", 1, 2));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "310896", 1, 2));
+            allClasses.Add(new PricingClass("EDAR", "EconomyA", "311211", 1, 2));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "311231", 1, 2));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "311241", 1, 2));
+            ////--Vilnisu 3
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "311196", 1, 3));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "311201", 1, 3));
+            allClasses.Add(new PricingClass("EDAR", "EconomyA", "311216", 1, 3));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "311251", 1, 3));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "311246", 1, 3));
+
 
             return allClasses;
         }

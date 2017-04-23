@@ -30,9 +30,23 @@ namespace IndividualLogins.Models.Dal
             }, "Value", "Text");
         }
 
-        public SelectList GetLocations()
+        public IEnumerable<SelectListItem> GetLocations()
         {
-            return new SelectList(new List<SelectListItem>(), "Value", "Text");
+            List<SelectListItem> sl = new List<SelectListItem>();
+            //sl.Add(new SelectListItem { Selected = false, Text = "Gdansk", Value = "12" });
+            //sl.Add(new SelectListItem { Selected = true, Text = "Riga", Value = "3" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Kaunas", Value = "2" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Krakow", Value = "11" });
+            sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Chopin)", Value = "4" });
+            sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Modlin)", Value = "9" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "London", Value = "5" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Fiumicino", Value = "6" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Rome", Value = "7" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Bologna", Value = "8" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Prague", Value = "10" });
+
+            return new SelectList(sl, "Value", "Text");
         }
 
         //public static JsonResult GetLocations(int country)

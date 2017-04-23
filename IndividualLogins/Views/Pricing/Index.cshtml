@@ -248,7 +248,7 @@
                 if (!isNaN(GetDateFromString($("#puDate2").val()).getTime())) {
                     //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
-                    $('#puDate3').val(DateToString(AddDays(GetDateFromString($("#puDate3").val()), 0)));
+                    $('#puDate3').val(DateToString(AddDays(GetDateFromString($("#doDate2").val()), 0)));
 
                     //$(this).datepicker('hide');
                 }
@@ -418,7 +418,7 @@
                 @foreach (var item in Model.AvailableClasses)
                 {
                     <label>
-                        <input type="checkbox" class="availableClasses" value="@item.Value" /> @item.Value
+                        <input type="checkbox" class="availableClasses" value="@item.Value" /> @item.Text
                     </label>
                 }
             </div>

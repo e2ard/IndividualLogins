@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
-using IndividualLogins.Controllers.App_Code;
 
 namespace IndividualLogins.Controllers
 {
@@ -21,7 +20,7 @@ namespace IndividualLogins.Controllers
         {
             if (User.IsInRole("Admin") || User.IsInRole("Edit") || User.IsInRole("Preview"))
             {
-                ViewBag.Locations = GetLocations();
+                ViewBag.Locations = dal.GetLocations();
                 ViewBag.Sources = dal.GetSources();
                 return View(new SearchFilters());
             }
@@ -74,7 +73,7 @@ namespace IndividualLogins.Controllers
         //    }
         //    return View(searchFilters);
         //}
-
+        [Authorize(Roles = "Admin, Edit, Preview")]
         public string GetResultFileName(SearchFilters searchFilters)
         {
             string fileName = "";
@@ -725,24 +724,7 @@ namespace IndividualLogins.Controllers
             return View();
         }
 
-        public IEnumerable<SelectListItem> GetLocations()
-        {
-            List<SelectListItem> sl = new List<SelectListItem>();
-            //sl.Add(new SelectListItem { Selected = false, Text = "Gdansk", Value = "12" });
-            //sl.Add(new SelectListItem { Selected = true, Text = "Riga", Value = "3" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Kaunas", Value = "2" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Krakow", Value = "11" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Chopin)", Value = "4" });
-            sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Modlin)", Value = "9" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "London", Value = "5" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Fiumicino", Value = "6" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Rome", Value = "7" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Bologna", Value = "8" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Prague", Value = "10" });
-
-            return new SelectList(sl, "Value", "Text");
-        }
+        
 
         public JsonResult GetLocations(int? country)
         {

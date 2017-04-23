@@ -15,9 +15,7 @@ namespace IndividualLogins.Models
         [Range(1, 100)]
         public int? Source { get; set; }
         public IEnumerable<SelectListItem> Sources { get; }
-        //[Required(ErrorMessage = "Country not chosen")]
-        //[Range(1, 100, ErrorMessage = "Please choose a country")]
-        //public int? Country { get; set; }
+        
         public IEnumerable<SelectListItem> Countries { get; }
         [Range(1, 100, ErrorMessage = "Please choose a location")]
         [Required(ErrorMessage = "Location not chosen")]

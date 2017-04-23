@@ -99,36 +99,40 @@ namespace IndividualLogins.Models
                     break;
             }
 
-            for (int i = 0; i < Classes.Count(); i++)
+
+            if (rates.Values.FirstOrDefault().Count > 0)
             {
-                List<JOffer> categoryOffers = GetMiniRatesList(rates, Classes[i].ClassName);
-
-                CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
-
-                List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
-                List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
-
-                string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
-                List<string> brokers = csvHelper.GetFuseBrokers();
-
-                foreach (string broker in brokers)//rewrite old rates possible unexpected results
+                for (int i = 0; i < Classes.Count(); i++)
                 {
-                    if (Sf.ApplyToAll && !(broker.Equals("CTR") || broker.Equals("JIG")))
-                        fuseRates = priceList.Select(s => s * BrokerDiscount(broker)).ToList();
-                    else
-                        fuseRates = csvHelper.GetFuseRates(broker);
-                    body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, broker, fuseRates, body);
+                    List<JOffer> categoryOffers = GetMiniRatesList(rates, Classes[i].ClassName);
+
+                    CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
+
+                    List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
+                    List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
+
+                    string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
+                    List<string> brokers = csvHelper.GetFuseBrokers();
+
+                    foreach (string broker in brokers)//rewrite old rates possible unexpected results
+                    {
+                        if (Sf.ApplyToAll && !(broker.Equals("CTR") || broker.Equals("JIG")))
+                            fuseRates = priceList.Select(s => s * BrokerDiscount(broker)).ToList();
+                        else
+                            fuseRates = csvHelper.GetFuseRates(broker);
+                        body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, broker, fuseRates, body);
+                    }
+
+                    body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
+
+                    Thread.Sleep(800);
+
+                    string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
+                    if (responseText.Length < 50)
+                        throw new Exception("Something went wrong");
+
+                    Thread.Sleep(1000);
                 }
-
-                body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
-
-                Thread.Sleep(800);
-
-                string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
-                if (responseText.Length < 50)
-                    throw new Exception("Something went wrong");
-
-                Thread.Sleep(1000);
             }
             return hm.CreatePdf(site, rates);
         }
@@ -156,7 +160,7 @@ namespace IndividualLogins.Models
                     lastAddedPrice = CalculatePriceJIG(gmPrice, price, fusePrice);
 
                     if (brokerName.Equals("JIG"))
-                        priceList.Add(!(categoryOffers.ElementAt(i).supplier.Contains("glob") && priceDiff < 2.5f && priceDiff > 0)
+                        priceList.Add(!((categoryOffers.ElementAt(i).GetSupplier() != null? categoryOffers.ElementAt(i).GetSupplier().Contains("glob") : false) && priceDiff < 2.5f && priceDiff > 0)
                             ? lastAddedPrice
                             : fusePrice);
 
@@ -166,7 +170,7 @@ namespace IndividualLogins.Models
                 else
                 {
                     //if (brokerName.Equals("JIG"))
-                     priceList.Add(lastAddedPrice += avg);
+                     priceList.Add(avg > 0? lastAddedPrice += avg: fuseRates.ElementAt(i));// if supplier price is 0
 
                     //if (brokerName.Equals("CTR"))
                     //    priceList.Add(CalculatePriceCTR(gmPrice, price, fusePrice));
@@ -401,6 +405,9 @@ namespace IndividualLogins.Models
 
         private float CalculatePriceJIG(float gmPrice, float price, float fusePrice)
         {
+            if (price == 0)
+                return fusePrice;
+
             float overridePrice = price;
             float priceDiff = gmPrice - price;
 
@@ -446,7 +453,7 @@ namespace IndividualLogins.Models
                         else
                             overridePrice = fusePrice + Math.Abs(priceDiff) * 0.25f;
                     else
-                        overridePrice = fusePrice + Math.Abs(priceDiff) * 0.4f;
+                        overridePrice = fusePrice + Math.Abs(priceDiff) * 0.52f;
                     //overridePrice = fusePrice - priceDiff * gmPrice / fusePrice * 0.5f;
                 }
                 else
