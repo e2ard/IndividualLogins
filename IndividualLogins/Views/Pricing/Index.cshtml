@@ -181,18 +181,13 @@
 
         
         $(document).ready(function () {
-            $('#Country').val("2");
-            LoadLocations();
-            $('#Country').change(function () {
-                LoadLocations();
-            });
-
-            $('#puDate1, #puDate2, #puDate3').datetimepicker({
+            
+            $('#puDate1, #puDate2, #puDate3, #puDate4, #puDate5, #puDate6').datetimepicker({
                 format: 'DD-MM-YYYY',
-                minDate: AddDays(new Date(), -1)
+                minDate: AddDays(new Date(), 0)
             })
 
-            $('#doDate1, #doDate2, #doDate3').datetimepicker({
+            $('#doDate1, #doDate2, #doDate3, #doDate4, #doDate5, #doDate6').datetimepicker({
                 format: 'DD-MM-YYYY',
                 minDate: AddDays(new Date(), 1)
                 //maxDate: AddDays(new Date(), 29)
@@ -206,6 +201,15 @@
 
             $('#puDate3').val(DateToString(AddDays(new Date(), 16)));
             $('#doDate3').val(DateToString(AddDays(new Date(), 23)));
+
+            $('#puDate4').val(DateToString(AddDays(new Date(), 23)));
+            $('#doDate4').val(DateToString(AddDays(new Date(), 28)));
+
+            $('#puDate5').val(DateToString(AddDays(new Date(), 28)));
+            $('#doDate5').val(DateToString(AddDays(new Date(), 31)));
+
+            $('#puDate6').val(DateToString(AddDays(new Date(), 31)));
+            $('#doDate6').val(DateToString(AddDays(new Date(), 35)));
 
             $("#puDate1").on("dp.change", function (e) {
                 if (!isNaN(GetDateFromString($("#puDate1").val()).getTime())) {
@@ -231,6 +235,33 @@
                     //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
                     //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
                     $('#doDate3').val(DateToString(AddDays(GetDateFromString($("#puDate3").val()), 7)));
+                    //$(this).datepicker('hide');
+                }
+            });
+
+            $("#puDate4").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate4").val()).getTime())) {
+                    //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#doDate4').val(DateToString(AddDays(GetDateFromString($("#puDate4").val()), 7)));
+                    //$(this).datepicker('hide');
+                }
+            });
+
+            $("#puDate5").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate5").val()).getTime())) {
+                    //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#doDate5').val(DateToString(AddDays(GetDateFromString($("#puDate5").val()), 7)));
+                    //$(this).datepicker('hide');
+                }
+            });
+
+            $("#puDate6").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate6").val()).getTime())) {
+                    //$('#DoDate').data("DateTimePicker").minDate(AddDays(GetDateFromString($("#PuDate").val()), 1));
+                    //$('#DoDate').data("DateTimePicker").maxDate(AddDays(GetDateFromString($("#PuDate").val()), 29));
+                    $('#doDate6').val(DateToString(AddDays(GetDateFromString($("#puDate6").val()), 7)));
                     //$(this).datepicker('hide');
                 }
             });
@@ -412,6 +443,87 @@
             </div>
         </div>
 
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBox("pickupDate4", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate4", @Value = "2017-10-15" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBox("dropoffDate4", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate4", @Value = "2017-10-23" })
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm ratesBtn" type='button' value="4" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set rates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-sm datesBtn" value="4" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set dates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBox("pickupDate5", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate5", @Value = "2017-10-15" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBox("dropoffDate5", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate5", @Value = "2017-10-23" })
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm ratesBtn" type='button' value="5" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set rates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-sm datesBtn" value="5" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set dates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group form-inline row">
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
+                    @Html.TextBox("pickupDate6", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate6", @Value = "2017-10-15" })
+                </div>
+            </div>
+
+            <div class="form-group input-group-md col-md-4">
+                <label class="control-label control-label-custom">Drop-off date</label>
+                <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
+                    <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
+                    @Html.TextBox("dropoffDate6", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate6", @Value = "2017-10-23" })
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm ratesBtn" type='button' value="6" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set rates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-sm datesBtn" value="6" style="background-color: #a9d300;margin-top:21px; height:33px">
+                    Set dates<span id="divLoading" style="margin-left: 5px;"></span>
+                </button>
+            </div>
+        </div>
 
         <div class="form-group form-inline row">
             <div class="form-group input-group-md col-md-12" id="Classes">
