@@ -144,9 +144,9 @@ namespace IndividualLogins.Models
 
             List<float> priceList = new List<float>();
             float lastAddedPrice = 0;
-            float avg = categoryOffers.Count() > 3
+            float avg = categoryOffers.Count() >= 3
                 ?GetAverage(categoryOffers.ElementAt(categoryOffers.Count() - 3).price, categoryOffers.ElementAt(categoryOffers.Count() - 2).price, categoryOffers.ElementAt(categoryOffers.Count() - 1).price)
-                : 10;
+                : 14;
 
             
             for (int i = 0; i < 30; i++)
@@ -464,7 +464,7 @@ namespace IndividualLogins.Models
             if ((price == 0 || gmPrice == 0) || (price - gmPrice < 1.5f) && price - gmPrice > 0 || overridePrice < 0)
                 return fusePrice;
 
-            if (overridePrice < price * 0.6f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
+            if (overridePrice < price * 0.58f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
                 return price * 0.8f;
 
             return overridePrice;
