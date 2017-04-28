@@ -37,7 +37,7 @@ namespace IndividualLogins.Models.Dal
             //sl.Add(new SelectListItem { Selected = true, Text = "Riga", Value = "3" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Kaunas", Value = "2" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Krakow", Value = "11" });
-            //sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
+            sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Chopin)", Value = "4" });
             sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Modlin)", Value = "9" });
             //sl.Add(new SelectListItem { Selected = false, Text = "London", Value = "5" });

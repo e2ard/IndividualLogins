@@ -131,7 +131,7 @@ namespace IndividualLogins.Models
                     if (responseText.Length < 50)
                         throw new Exception("Something went wrong");
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(800);
                 }
             }
             return hm.CreatePdf(site, rates);

@@ -133,6 +133,24 @@ namespace IndividualLogins.Controllers
             allClasses.Add(new PricingClass("CDMR", "CompactM", "311251", 1, 3));
             allClasses.Add(new PricingClass("CDAR", "CompactA", "311246", 1, 3));
 
+            //--VIlnius 4
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "312102", 1, 4));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "312117", 1, 4));
+            allClasses.Add(new PricingClass("EDAR", "EconomyA", "312137", 1, 4));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "312152", 1, 4));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "312167", 1, 4));
+            ////--Vilnius 5
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "312107", 1, 5));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "312122", 1, 5));
+            allClasses.Add(new PricingClass("EDAR", "EconomyA", "312142", 1, 5));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "312157", 1, 5));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "312172", 1, 5));
+            ////--Vilnisu 6
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "312112", 1, 6));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "312127", 1, 6));
+            allClasses.Add(new PricingClass("EDAR", "EconomyA", "312147", 1, 6));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "312162", 1, 6));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "312177", 1, 6));
 
             return allClasses;
         }
