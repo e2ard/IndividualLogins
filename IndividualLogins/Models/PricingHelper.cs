@@ -25,43 +25,39 @@ namespace IndividualLogins.Models
             SetBrokerDiscounts();
         }
 
-        public string SetDates()
+        private string GetBrokerName(int? source)
         {
-            Dictionary<string, Dictionary<string, JOffer>> rates = null;
-            string brokerName = "";
-            SiteBase site = null;
-            Controllers.HomeController hm = new Controllers.HomeController();
-            Sf.DoDate.AddDays(2);// add 2 days to render data
-
-            switch (Sf.Source)
+            switch (source)
             {
                 case 1:
-                    rates = hm.GetRentalPdf(Sf, out site);
-                    brokerName = "JIG";
-                    break;
+                    return "JIG";
                 case 2:
-                    rates = hm.GetCarTrawlerPdf(Sf, out site);
-                    brokerName = "CTR";
-                    break;
+                    return "CTR";
                 case 3:
-                    rates = hm.GetScannerPdf(Sf, out site);
-                    brokerName = "CTR";
-                    break;
+                    return "CTR";
             }
+            return null;
+        }
+        public string SetDates()
+        {
+            Dictionary<string, Dictionary<string, JOffer>> pdfRates = null;
+            string brokerName = "";
+            SiteBase site = null;
+            Rates rates = new Rates();
+            Sf.DoDate.AddDays(2);// add 2 days to render data
+
+            brokerName = GetBrokerName(Sf.Location);
 
             Sf.DoDate.AddDays(-2);// add 2 days to render data
             for (int i = 0; i < Classes.Count(); i++)
             {
-                List<JOffer> categoryOffers = GetMiniRatesList(rates, Classes[i].ClassName);
-
+                List<JOffer> categoryOffers = GetMiniRatesList(pdfRates, Classes[i].ClassName);
                 CsvHelper csvHelper = new CsvHelper();
 
-                //List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
                 brokerName = "JIG";
                 List<float> priceList = InitiatePrices(categoryOffers, brokerName, Classes[i].ClassName);
                 string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
-
-
+                
                 brokerName = "CTR";
                 priceList = InitiatePrices(categoryOffers, brokerName, Classes[i].ClassName);
                 body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
@@ -74,67 +70,54 @@ namespace IndividualLogins.Models
 
                 Thread.Sleep(1000);
             }
-            return hm.CreatePdf(site, rates);
+            return rates.CreatePdf(site, pdfRates);
         }
 
         public string Excecute()
         {
-            Dictionary<string, Dictionary<string, JOffer>> rates = null;
-            string brokerName = "";
+            Dictionary<string, Dictionary<string, JOffer>> pdfRates = null;
+            string brokerName = GetBrokerName(Sf.Location);
             SiteBase site = null;
+
             Controllers.HomeController hm = new Controllers.HomeController();
-            switch (Sf.Source)
-            {
-                case 1:
-                    rates = hm.GetRentalPdf(Sf, out site);
-                    brokerName = "JIG";
-                    break;
-                case 2:
-                    rates = hm.GetCarTrawlerPdf(Sf, out site);
-                    brokerName = "CTR";
-                    break;
-                case 3:
-                    rates = hm.GetScannerPdf(Sf, out site);
-                    brokerName = "CTR";
-                    break;
-            }
+            Rates rates = new Rates();
+            pdfRates = rates.GetRates(Sf, out site);
+            
+            //if (rates.Values.FirstOrDefault().Count > 0)
+            //{
+            //    for (int i = 0; i < Classes.Count(); i++)
+            //    {
+            //        List<JOffer> categoryOffers = GetMiniRatesList(rates, Classes[i].ClassName);
 
+            //        CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
 
-            if (rates.Values.FirstOrDefault().Count > 0)
-            {
-                for (int i = 0; i < Classes.Count(); i++)
-                {
-                    List<JOffer> categoryOffers = GetMiniRatesList(rates, Classes[i].ClassName);
+            //        List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
+            //        List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
 
-                    CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
+            //        string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
+            //        List<string> brokers = csvHelper.GetFuseBrokers();
 
-                    List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
-                    List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
+            //        foreach (string broker in brokers)//rewrite old rates possible unexpected results
+            //        {
+            //            if (Sf.ApplyToAll && !(broker.Equals("CTR") || broker.Equals("JIG")))
+            //                fuseRates = priceList.Select(s => s * BrokerDiscount(broker)).ToList();
+            //            else
+            //                fuseRates = csvHelper.GetFuseRates(broker);
+            //            body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, broker, fuseRates, body);
+            //        }
 
-                    string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
-                    List<string> brokers = csvHelper.GetFuseBrokers();
+            //        body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
 
-                    foreach (string broker in brokers)//rewrite old rates possible unexpected results
-                    {
-                        if (Sf.ApplyToAll && !(broker.Equals("CTR") || broker.Equals("JIG")))
-                            fuseRates = priceList.Select(s => s * BrokerDiscount(broker)).ToList();
-                        else
-                            fuseRates = csvHelper.GetFuseRates(broker);
-                        body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, broker, fuseRates, body);
-                    }
+            //        Thread.Sleep(800);
 
-                    body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
+            //        string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
+            //        if (responseText.Length < 50)
+            //            throw new Exception("Something went wrong");
 
-                    Thread.Sleep(800);
-
-                    string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
-                    if (responseText.Length < 50)
-                        throw new Exception("Something went wrong");
-
-                    Thread.Sleep(800);
-                }
-            }
-            return hm.CreatePdf(site, rates);
+            //        Thread.Sleep(800);
+            //    }
+            //}
+            return rates.CreatePdf(site, pdfRates);
         }
 
         private List<float> CalculatePrices(List<JOffer> categoryOffers, List<float> fuseRates, string brokerName)
@@ -228,18 +211,7 @@ namespace IndividualLogins.Models
             return priceList;
         }
 
-        //public void MakeRequests(string linkId)
-        //{
-        //    HttpWebResponse response;
-        //    string responseText;
-
-        //    if (Request_gmlithuania_fusemetrix_com(linkId, out response))
-        //    {
-        //        responseText = ReadResponse(response);
-
-        //        response.Close();
-        //    }
-        //}
+        
         private float BrokerDiscount(string brokerName)
         {
 

@@ -13,9 +13,6 @@ using System.Text.RegularExpressions;
 namespace IndividualLogins.Controllers.App_Code
 {
 
-    /// <summary>
-    /// Summary description for SurceReader
-    /// </summary>
     public class JSourceReader
     {
         public static string ipStr = "lv2.nordvpn.com";//"193.105.240.1";

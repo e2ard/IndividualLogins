@@ -13,6 +13,10 @@ namespace IndividualLogins.Models
         public List<SelectListItem> AvailableClasses { get; set; }
         public bool ApplyToAll { get; set; }
 
+        public string GetString()
+        {
+            return "loc:" + Location + " intvNr:" + IntervalNum + " cls:" + Classes;
+        }
     }
 
     public class PricingClass

@@ -37,6 +37,8 @@ namespace IndividualLogins.Controllers
         {
             if (ModelState.IsValid)
             {
+                DbUpdates.UpdatedRates(searchFilters, User.Identity.Name);
+
                 PricingHelper pr = new PricingHelper(searchFilters,
                 allClasses.Where(s => s.LocationId == searchFilters.Location && s.IntervalNum == searchFilters.IntervalNum && searchFilters.Classes.FirstOrDefault().Contains(s.ClassName)).ToArray());
                 return pr.Excecute();
@@ -58,7 +60,6 @@ namespace IndividualLogins.Controllers
             else
                 return "";
         }
-
 
         private List<SelectListItem> GetClasses()
         {
