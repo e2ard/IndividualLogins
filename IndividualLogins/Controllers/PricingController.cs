@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
+using IndividualLogins.Models.NlogTest.Models;
 
 namespace IndividualLogins.Controllers
 {
@@ -21,7 +22,7 @@ namespace IndividualLogins.Controllers
         {
             allClasses = AllClasses();
         }
-        // GET: Pricing
+        
         [Authorize(Roles = "Admin, Edit")]
         public ActionResult Index()
         {
@@ -32,19 +33,49 @@ namespace IndividualLogins.Controllers
             return View(pm);
         }
 
+        public JsonResult GetIntervals(int? locationId)
+        {
+            IntervalDates[] intDates = new IntervalDates[7];
+            if (locationId > 0)
+            {
+                using (RatesDBContext ctx = new RatesDBContext())
+                {
+                    for (int i = 1; i <= 6; i++)
+                    {
+                        Update updt = ctx.Updates.Where(w => w.LocationId == locationId && w.IntervalNum == i).OrderByDescending(o => o.UpdateTime).FirstOrDefault();
+                        if (updt != null) 
+                            intDates[i] = new IntervalDates {PuDate = updt.PickupTime, DoDate = updt.DropoffTime };
+                    }
+                }
+            }
+
+            return new JsonResult()
+            {
+                Data = intDates,
+                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+            };
+        }
         [Authorize(Roles = "Admin, Edit")]
         public string GeneratePrices(PricingModel searchFilters)
         {
-            if (ModelState.IsValid)
+            try
             {
-                DbUpdates.UpdatedRates(searchFilters, User.Identity.Name);
+                if (ModelState.IsValid)
+                {
+                    DbUpdates.UpdatedRates(searchFilters, User.Identity.Name);
 
-                PricingHelper pr = new PricingHelper(searchFilters,
-                allClasses.Where(s => s.LocationId == searchFilters.Location && s.IntervalNum == searchFilters.IntervalNum && searchFilters.Classes.FirstOrDefault().Contains(s.ClassName)).ToArray());
-                return pr.Excecute();
+                    PricingHelper pr = new PricingHelper(searchFilters,
+                    allClasses.Where(s => s.LocationId == searchFilters.Location && s.IntervalNum == searchFilters.IntervalNum && searchFilters.Classes.FirstOrDefault().Contains(s.ClassName)).ToArray());
+                    return pr.Excecute();
+                }
+                else
+                    return "";
             }
-            else
+            catch(Exception ex)
+            {
+                Log.Instance.Error("--- " + ex.Message + "\n " + ex.InnerException + "\n" + ex.StackTrace);
                 return "";
+            }
         }
 
         [Authorize(Roles = "Admin, Edit")]
@@ -52,6 +83,8 @@ namespace IndividualLogins.Controllers
         {
             if (ModelState.IsValid)
             {
+                DbUpdates.UpdatedRates(searchFilters, User.Identity.Name);
+
                 PricingHelper pr = new PricingHelper(searchFilters,
                 allClasses.Where(s => s.LocationId == searchFilters.Location && s.IntervalNum == searchFilters.IntervalNum && searchFilters.Classes.FirstOrDefault().Contains(s.ClassName)).ToArray());
 
@@ -146,12 +179,44 @@ namespace IndividualLogins.Controllers
             allClasses.Add(new PricingClass("EDAR", "EconomyA", "312142", 1, 5));
             allClasses.Add(new PricingClass("CDMR", "CompactM", "312157", 1, 5));
             allClasses.Add(new PricingClass("CDAR", "CompactA", "312172", 1, 5));
-            ////--Vilnisu 6
+            ////--Vilniss 6
             allClasses.Add(new PricingClass("MCMR", "MiniM", "312112", 1, 6));
             allClasses.Add(new PricingClass("EDMR", "EconomyM", "312127", 1, 6));
             allClasses.Add(new PricingClass("EDAR", "EconomyA", "312147", 1, 6));
             allClasses.Add(new PricingClass("CDMR", "CompactM", "312162", 1, 6));
             allClasses.Add(new PricingClass("CDAR", "CompactA", "312177", 1, 6));
+
+            ////--Riga mini
+            allClasses.Add(new PricingClass("EDMR", "MiniM", "314141", 3, 1));
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "314146", 3, 2));
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "314151", 3, 3));
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "314156", 3, 4));
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "314161", 3, 5));
+            allClasses.Add(new PricingClass("MCMR", "MiniM", "314166", 3, 6));
+
+            ////--Riga ekom
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "314171", 3, 1));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "314176", 3, 2));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "314181", 3, 3));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "314186", 3, 4));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "314191", 3, 5));
+            allClasses.Add(new PricingClass("EDMR", "EconomyM", "314196", 3, 6));
+
+            ////--Riga compactm
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "314201", 3, 1));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "314206", 3, 2));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "314211", 3, 3));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "314216", 3, 4));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "314251", 3, 5));
+            allClasses.Add(new PricingClass("CDMR", "CompactM", "314256", 3, 6));
+
+            ////--Riga compacta
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "314221", 3, 1));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "314226", 3, 2));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "314231", 3, 3));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "314236", 3, 4));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "314241", 3, 5));
+            allClasses.Add(new PricingClass("CDAR", "CompactA", "314246", 3, 6));
 
             return allClasses;
         }

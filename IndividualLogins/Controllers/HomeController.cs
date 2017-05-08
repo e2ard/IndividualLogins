@@ -1,6 +1,7 @@
 ﻿using IndividualLogins.Controllers.App_Code;
 using IndividualLogins.Models;
 using IndividualLogins.Models.Dal;
+using IndividualLogins.Models.NlogTest.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,17 +31,30 @@ namespace IndividualLogins.Controllers
         [Authorize(Roles = "Admin, Edit, Preview")]
         public string GetResultFileName(SearchFilters searchFilters)
         {
+            Log.Instance.Warn("---Begin: GetResultFileName");
             string fileName = "";
             SiteBase site = null;
-            
-            if (ModelState.IsValid)
+            try
             {
-                DbUpdates.PdfCreated(searchFilters, User.Identity.Name);
-                Rates rates = new Rates();
-                return fileName = rates.GetPdfLocation(site, searchFilters);
+                if (ModelState.IsValid)
+                {
+                    Log.Instance.Warn("---: GetResultFileName");
+                    DbUpdates.PdfCreated(searchFilters, User.Identity.Name);
+
+                    return fileName = new Rates().GetPdfLocation(site, searchFilters);
+                }
+                else
+                {
+                    Log.Instance.Warn("---else: GetResultFileName");
+
+                    return "";
+                }
             }
-            else
+            catch (Exception ex)
+            {
+                Log.Instance.Error("--- " + ex.Message + "\n " + ex.InnerException + "\n" + ex.StackTrace);
                 return "";
+            }
         }
         
         

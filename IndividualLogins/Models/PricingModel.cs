@@ -39,4 +39,16 @@ namespace IndividualLogins.Models
             IntervalNum = intervalNum;
         }
     }
+
+    public class IntervalResults
+    {
+        public int[] Intervals { get; set; }
+        public IntervalDates[] Dates { get; set; }
+    }
+
+    public class IntervalDates
+    {
+        public DateTime? PuDate { get; set; }
+        public DateTime? DoDate { get; set; }
+    }
 }

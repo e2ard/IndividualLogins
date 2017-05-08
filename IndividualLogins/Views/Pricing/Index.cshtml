@@ -26,7 +26,7 @@
             else
                 $("#adivLoadingExcel").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
         }
-        
+
         $(document).ready(function () {
             $('.ratesBtn').click(function (){
                 $("#PuDate").val($('#puDate' + $(this).val()).val());
@@ -86,6 +86,12 @@
                     return false;
                 }
             };
+
+            $('#Location').change(
+                function () {
+                    GetIntervals();
+                }
+            );
 
             $('.datesBtn').click(function InitDates() {
                 $("#PuDate").val($('#puDate' + $(this).val()).val());
@@ -171,6 +177,22 @@
             return false;
         }
 
+
+        function GetIntervals() {
+            $.getJSON('@Url.Action("GetIntervals")', { locationId: $('#Location').val() }, function (response) {
+                $.each(response, function (index, item) {
+                    if (item != null) {
+                        $('#puDate' + index).val(DateToString(new Date(parseInt(item.PuDate.substr(6)))));
+                        $('#doDate' + index).val(DateToString(new Date(parseInt(item.DoDate.substr(6)))));
+                    }
+                    else {
+                        $('#puDate' + index).val('');
+                        $('#doDate' + index).val('');
+                    }
+                });
+            });
+            return false;
+        }
         function LoadSourcesStatic() {
             var sources = $('#Source');
             var sourceList = ["Rental Cars", "Car Trawler", "Car Scanner", "Atlas Choise"];
@@ -179,9 +201,9 @@
             });
         }
 
-        
+
         $(document).ready(function () {
-            
+
             $('#puDate1, #puDate2, #puDate3, #puDate4, #puDate5, #puDate6').datetimepicker({
                 format: 'DD-MM-YYYY',
                 minDate: AddDays(new Date(), 0)
@@ -193,7 +215,11 @@
                 //maxDate: AddDays(new Date(), 29)
             });
 
-            $('#puDate1').val(DateToString(AddDays(new Date(), 1)));
+            $('#puDate1, #puDate2, #puDate3, #puDate4, #puDate5, #puDate6').val('');
+            $('#doDate1, #doDate2, #doDate3, #doDate4, #doDate5, #doDate6').val('');
+
+
+         /*   $('#puDate1').val(DateToString(AddDays(new Date(), 1)));
             $('#doDate1').val(DateToString(AddDays(new Date(), 7)));
 
             $('#puDate2').val(DateToString(AddDays(new Date(), 7)));
@@ -209,7 +235,7 @@
             $('#doDate5').val(DateToString(AddDays(new Date(), 31)));
 
             $('#puDate6').val(DateToString(AddDays(new Date(), 31)));
-            $('#doDate6').val(DateToString(AddDays(new Date(), 35)));
+            $('#doDate6').val(DateToString(AddDays(new Date(), 35)));*/
 
             $("#puDate1").on("dp.change", function (e) {
                 if (!isNaN(GetDateFromString($("#puDate1").val()).getTime())) {
@@ -282,6 +308,28 @@
                     $('#puDate3').val(DateToString(AddDays(GetDateFromString($("#doDate2").val()), 0)));
 
                     //$(this).datepicker('hide');
+                }
+            });
+
+
+            $("#doDate3").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate3").val()).getTime())) {
+
+                    $('#puDate4').val(DateToString(AddDays(GetDateFromString($("#doDate3").val()), 0)));
+                }
+            });
+
+            $("#doDate4").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate4").val()).getTime())) {
+
+                    $('#puDate5').val(DateToString(AddDays(GetDateFromString($("#doDate4").val()), 0)));
+                }
+            });
+
+            $("#doDate5").on("dp.change", function (e) {
+                if (!isNaN(GetDateFromString($("#puDate5").val()).getTime())) {
+
+                    $('#puDate6').val(DateToString(AddDays(GetDateFromString($("#doDate5").val()), 0)));
                 }
             });
 
@@ -358,7 +406,7 @@
             </div>
             <div class="form-group col-md-6">
                 @Html.LabelFor(model => model.Location, new { @class = "control-label-custom" })
-                @Html.DropDownListFor(m => m.Location, new SelectList(ViewBag.Locations, "Value", "Text", 0), new { @class = "form-control" })
+                @Html.DropDownListFor(m => m.Location, new SelectList(ViewBag.Locations, "Value", "Text", 0), "Choose", new { @class = "form-control" })
             </div>
         </div>
 
@@ -367,7 +415,7 @@
                 <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
-                    @Html.TextBox("pickupDate1", null, new { @class = "form-control pickupDate", style = "padding:5px;", id="puDate1", @Value = "2017-10-15" })
+                    @Html.TextBox("pickupDate1", null, new { @class = "form-control pickupDate", style = "padding:5px;", id="puDate1", @Value = "" })
                 </div>
             </div>
 
@@ -375,7 +423,7 @@
                 <label class="control-label control-label-custom">Drop-off date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
-                    @Html.TextBox("dropoffDate1", null, new { @class = "form-control doDate", style = "padding:5px;", id = "doDate1",  @Value = "2017-10-23" })
+                    @Html.TextBox("dropoffDate1", null, new { @class = "form-control doDate", style = "padding:5px;", id = "doDate1",  @Value = "" })
                 </div>
             </div>
 
@@ -394,7 +442,7 @@
                 <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
-                    @Html.TextBox("pickupDate2", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate2", @Value = "2017-10-15" })
+                    @Html.TextBox("pickupDate2", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate2", @Value = "" })
                 </div>
             </div>
 
@@ -402,7 +450,7 @@
                 <label class="control-label control-label-custom">Drop-off date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
-                    @Html.TextBox("dropoffDate2", null, new { @class = "form-control doDate", style = "padding:5px;", id = "doDate2", @Value = "2017-10-23" })
+                    @Html.TextBox("dropoffDate2", null, new { @class = "form-control doDate", style = "padding:5px;", id = "doDate2", @Value = " " })
                 </div>
             </div>
 
@@ -421,7 +469,7 @@
                 <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
-                    @Html.TextBox("pickupDate3", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate3", @Value = "2017-10-15" })
+                    @Html.TextBox("pickupDate3", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate3", @Value = "" })
                 </div>
             </div>
 
@@ -429,7 +477,7 @@
                 <label class="control-label control-label-custom">Drop-off date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
-                    @Html.TextBox("dropoffDate3", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate3", @Value = "2017-10-23" })
+                    @Html.TextBox("dropoffDate3", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate3", @Value = " " })
                 </div>
             </div>
 
@@ -449,7 +497,7 @@
                 <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
-                    @Html.TextBox("pickupDate4", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate4", @Value = "2017-10-15" })
+                    @Html.TextBox("pickupDate4", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate4", @Value = "" })
                 </div>
             </div>
 
@@ -457,7 +505,7 @@
                 <label class="control-label control-label-custom">Drop-off date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
-                    @Html.TextBox("dropoffDate4", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate4", @Value = "2017-10-23" })
+                    @Html.TextBox("dropoffDate4", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate4", @Value = " " })
                 </div>
             </div>
 
@@ -476,7 +524,7 @@
                 <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
-                    @Html.TextBox("pickupDate5", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate5", @Value = "2017-10-15" })
+                    @Html.TextBox("pickupDate5", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate5", @Value = "" })
                 </div>
             </div>
 
@@ -484,7 +532,7 @@
                 <label class="control-label control-label-custom">Drop-off date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
-                    @Html.TextBox("dropoffDate5", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate5", @Value = "2017-10-23" })
+                    @Html.TextBox("dropoffDate5", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate5", @Value = " " })
                 </div>
             </div>
 
@@ -503,7 +551,7 @@
                 <label class="control-label control-label-custom" style="width:97px">Pick-up date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px;">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar"></span></span>
-                    @Html.TextBox("pickupDate6", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate6", @Value = "2017-10-15" })
+                    @Html.TextBox("pickupDate6", null, new { @class = "form-control pickupDate", style = "padding:5px;", id = "puDate6", @Value = "" })
                 </div>
             </div>
 
@@ -511,7 +559,7 @@
                 <label class="control-label control-label-custom">Drop-off date</label>
                 <div class="input-group col-md-12" style="margin-left: 0px; padding-left: 0px; padding-right: 0px">
                     <span class="input-group-addon" style="background-color: #a9d300; color: #fff"><span class="glyphicon glyphicon-calendar" style="background-color: #a9d300; color: #fff"></span></span>
-                    @Html.TextBox("dropoffDate6", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate6", @Value = "2017-10-23" })
+                    @Html.TextBox("dropoffDate6", null, new { @class = "form-control  doDate", style = "padding:5px;", id = "doDate6", @Value = " " })
                 </div>
             </div>
 

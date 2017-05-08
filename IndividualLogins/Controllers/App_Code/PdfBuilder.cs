@@ -6,6 +6,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Collections.Generic;
 using System.Linq;
+using IndividualLogins.Models.NlogTest.Models;
 
 namespace IndividualLogins.Controllers.App_Code
 {
@@ -39,6 +40,7 @@ namespace IndividualLogins.Controllers.App_Code
                 catch(IOException ioe)
                 {
                     fs = new FileStream(PATH +  fileName + "(1).pdf", FileMode.Create, FileAccess.Write, FileShare.None);
+                    Log.Instance.Warn("--- PdfBuilder" + ioe.Message);
                 }
                 fileName += ".pdf";
                 doc = new Document(PageSize.A4, 10, 10, 10, 10);
@@ -52,10 +54,10 @@ namespace IndividualLogins.Controllers.App_Code
             }
             else
             {
+                Log.Instance.Warn("--- PdfBuilder Site is null");
                 throw new Exception("Site is null");
             }
         }
-
         public PdfBuilder()
         {
         }
@@ -87,12 +89,9 @@ namespace IndividualLogins.Controllers.App_Code
         {
             int colSpan = Const.categories.Count + 1;
             table = new PdfPTable(colSpan);
-            //fix the absolute width of the table
-            table.LockedWidth = true;
-
-            //relative col widths in proportions - 1/3 and 2/3
-
-            float[] widths = new float[colSpan];
+            table.LockedWidth = true;//fix the absolute width of the table
+            
+            float[] widths = new float[colSpan];//relative col widths in proportions - 1/3 and 2/3
 
             for (int i = 0; i < colSpan; i++)
             {
@@ -102,20 +101,15 @@ namespace IndividualLogins.Controllers.App_Code
             widths[1] = 2.5f;
 
             table.SetWidths(widths);
-
             table.HorizontalAlignment = 0;
-
-            //leave a gap before and after the table
-
-            table.SpacingBefore = 10f;
+            table.SpacingBefore = 10f;//leave a gap before and after the table
             table.SpacingAfter = 30f;
             table.TotalWidth = doc.Right - doc.Left;
 
             Font font1 = FontFactory.GetFont("Arial", 9, Font.NORMAL);
+
             PdfPCell cell = new PdfPCell(new Phrase(documentTitle + " " + puMonth + "-" + puDay + " " + city, font1));
-
             cell.Colspan = colSpan;
-
             cell.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
 
             table.AddCell(cell);
@@ -130,10 +124,9 @@ namespace IndividualLogins.Controllers.App_Code
                 cell = new PdfPCell(new Phrase(Const.categories.ElementAt(i).PdfClass.ToLower(), font));
                 table.AddCell(cell);
             }
-
         }
 
-        public void addRow(JOffer[] offers)
+        public void AddRow(JOffer[] offers)
         {
             PdfPCell cell = new PdfPCell(new Phrase(puMonth + "-" + puDay + "/" + doDate.AddDays(dayNum).Day + "\n" + dayNum, font));
             dayNum++;

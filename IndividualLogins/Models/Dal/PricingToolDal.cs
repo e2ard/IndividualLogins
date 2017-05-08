@@ -33,13 +33,22 @@ namespace IndividualLogins.Models.Dal
         public IEnumerable<SelectListItem> GetLocations()
         {
             List<SelectListItem> sl = new List<SelectListItem>();
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                List<Location> locs = ctx.Locations.Where(s => s.IsAvailable).ToList();
+                foreach (Location l in locs)
+                {
+                    sl.Add(new SelectListItem { Text = l.Name, Value = l.LocationId.ToString() });
+                }
+            }
+                //List<SelectListItem> sl = new List<SelectListItem>();
             //sl.Add(new SelectListItem { Selected = false, Text = "Gdansk", Value = "12" });
             //sl.Add(new SelectListItem { Selected = true, Text = "Riga", Value = "3" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Kaunas", Value = "2" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Krakow", Value = "11" });
-            sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Vilnius", Value = "1" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Chopin)", Value = "4" });
-            sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Modlin)", Value = "9" });
+            //sl.Add(new SelectListItem { Selected = false, Text = "Warsaw (Modlin)", Value = "9" });
             //sl.Add(new SelectListItem { Selected = false, Text = "London", Value = "5" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Fiumicino", Value = "6" });
             //sl.Add(new SelectListItem { Selected = false, Text = "Rome", Value = "7" });

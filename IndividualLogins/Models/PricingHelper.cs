@@ -41,14 +41,12 @@ namespace IndividualLogins.Models
         public string SetDates()
         {
             Dictionary<string, Dictionary<string, JOffer>> pdfRates = null;
-            string brokerName = "";
+            string brokerName = GetBrokerName(Sf.Location);
             SiteBase site = null;
+
             Rates rates = new Rates();
-            Sf.DoDate.AddDays(2);// add 2 days to render data
-
-            brokerName = GetBrokerName(Sf.Location);
-
-            Sf.DoDate.AddDays(-2);// add 2 days to render data
+            pdfRates = rates.GetRates(Sf, out site);
+            
             for (int i = 0; i < Classes.Count(); i++)
             {
                 List<JOffer> categoryOffers = GetMiniRatesList(pdfRates, Classes[i].ClassName);
@@ -79,44 +77,43 @@ namespace IndividualLogins.Models
             string brokerName = GetBrokerName(Sf.Location);
             SiteBase site = null;
 
-            Controllers.HomeController hm = new Controllers.HomeController();
             Rates rates = new Rates();
             pdfRates = rates.GetRates(Sf, out site);
-            
-            //if (rates.Values.FirstOrDefault().Count > 0)
-            //{
-            //    for (int i = 0; i < Classes.Count(); i++)
-            //    {
-            //        List<JOffer> categoryOffers = GetMiniRatesList(rates, Classes[i].ClassName);
 
-            //        CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
+            if (pdfRates.Values.FirstOrDefault().Count > 0)
+            {
+                for (int i = 0; i < Classes.Count(); i++)
+                {
+                    List<JOffer> categoryOffers = GetMiniRatesList(pdfRates, Classes[i].ClassName);
 
-            //        List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
-            //        List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
+                    CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
 
-            //        string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
-            //        List<string> brokers = csvHelper.GetFuseBrokers();
+                    List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
+                    List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
 
-            //        foreach (string broker in brokers)//rewrite old rates possible unexpected results
-            //        {
-            //            if (Sf.ApplyToAll && !(broker.Equals("CTR") || broker.Equals("JIG")))
-            //                fuseRates = priceList.Select(s => s * BrokerDiscount(broker)).ToList();
-            //            else
-            //                fuseRates = csvHelper.GetFuseRates(broker);
-            //            body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, broker, fuseRates, body);
-            //        }
+                    string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
+                    List<string> brokers = csvHelper.GetFuseBrokers();
 
-            //        body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
+                    foreach (string broker in brokers)//rewrite old rates possible unexpected results
+                    {
+                        if (Sf.ApplyToAll && !(broker.Equals("CTR") || broker.Equals("JIG")))
+                            fuseRates = priceList.Select(s => s * BrokerDiscount(broker)).ToList();
+                        else
+                            fuseRates = csvHelper.GetFuseRates(broker);
+                        body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, broker, fuseRates, body);
+                    }
 
-            //        Thread.Sleep(800);
+                    body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
 
-            //        string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
-            //        if (responseText.Length < 50)
-            //            throw new Exception("Something went wrong");
+                    Thread.Sleep(800);
 
-            //        Thread.Sleep(800);
-            //    }
-            //}
+                    string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
+                    if (responseText.Length < 50)
+                        throw new Exception("Something went wrong");
+
+                    Thread.Sleep(800);
+                }
+            }
             return rates.CreatePdf(site, pdfRates);
         }
 
@@ -127,11 +124,9 @@ namespace IndividualLogins.Models
 
             List<float> priceList = new List<float>();
             float lastAddedPrice = 0;
-            float avg = categoryOffers.Count() >= 3
-                ?GetAverage(categoryOffers.ElementAt(categoryOffers.Count() - 3).price, categoryOffers.ElementAt(categoryOffers.Count() - 2).price, categoryOffers.ElementAt(categoryOffers.Count() - 1).price)
-                : 14;
+            float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
 
-            
+
             for (int i = 0; i < 30; i++)
             {
                 if (i < categoryOffers.Count())
@@ -187,7 +182,7 @@ namespace IndividualLogins.Models
             }
 
 
-            float avg = GetAverage(categoryOffers.ElementAt(categoryOffers.Count() - 3).price, categoryOffers.ElementAt(categoryOffers.Count() - 2).price, categoryOffers.ElementAt(categoryOffers.Count() - 1).price);
+            float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
             float lastAddedPrice = 0;
 
             for (int i = 0; i < 30; i++)
@@ -218,13 +213,21 @@ namespace IndividualLogins.Models
             return brokerDiscounts.ContainsKey(brokerName) ? brokerDiscounts[brokerName] : 0;
         }
 
-        private float GetAverage(float price1, float price2, float price3)
+        private float GetAverage(List<float> supplierPrices)
         {
-            float avgSum = 30;
+            float avgSum = 0;
+            int sumNum = 0;
 
-            avgSum = price3  - price2 +  price2 - price1;
+            for(int i = 1; i < supplierPrices.Count; i++)
+            {
+                if (supplierPrices.ElementAt(i) > 0 && supplierPrices.ElementAt(i - 1) > 0)
+                {
+                    avgSum += Math.Abs(supplierPrices.ElementAt(i) - supplierPrices.ElementAt(i - 1));
+                    sumNum++;
+                }
+            }
 
-            return avgSum / 2;
+            return avgSum / sumNum > 0? avgSum / sumNum: 14 ;
         }
         private void SetBrokerDiscounts()
         {
@@ -436,8 +439,8 @@ namespace IndividualLogins.Models
             if ((price == 0 || gmPrice == 0) || (price - gmPrice < 1.5f) && price - gmPrice > 0 || overridePrice < 0)
                 return fusePrice;
 
-            if (overridePrice < price * 0.58f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
-                return price * 0.8f;
+            if (overridePrice < price * 0.67f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
+                return price * 0.69f;
 
             return overridePrice;
         }

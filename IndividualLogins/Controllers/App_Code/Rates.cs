@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Threading;
+using IndividualLogins.Models.NlogTest.Models;
 
 namespace IndividualLogins.Controllers.App_Code
 {
@@ -11,10 +12,17 @@ namespace IndividualLogins.Controllers.App_Code
     {
         public string GetPdfLocation(SiteBase s, SearchFilters sf)
         {
-            return CreatePdf(s, GetRates(sf, out s));
+            Log.Instance.Warn("---Begin: GetPdfLocation");
+            Dictionary<string, Dictionary<string, JOffer>> offerMap = GetRates(sf, out s);
+
+            string fileName = CreatePdf(s, offerMap);
+
+            Log.Instance.Warn("---End: GetPdfLocation");
+            return fileName;
         }
         public Dictionary<string, Dictionary<string, JOffer>> GetRates(SearchFilters searchFilters, out SiteBase tempSite)
         {
+            Log.Instance.Warn("---Begin: GetRates");
             SiteBase site = null;
             switch (searchFilters.Source)
             {
@@ -25,6 +33,7 @@ namespace IndividualLogins.Controllers.App_Code
                 case 3:
                     return GetScannerRates(searchFilters, out tempSite);
             }
+            Log.Instance.Warn("---Begin: GetRates");
             tempSite = null;
             return null;
         }
@@ -51,7 +60,7 @@ namespace IndividualLogins.Controllers.App_Code
                             offers.Add(new JOffer());
                     }
                 }
-                pdf.addRow(offers.ToArray());
+                pdf.AddRow(offers.ToArray());
             }
             pdf.Close();
             return pdf.fileName;
@@ -60,6 +69,7 @@ namespace IndividualLogins.Controllers.App_Code
 
         public Dictionary<string, Dictionary<string, JOffer>> GetRentalRates(SearchFilters searchFilters, out SiteBase site)
         {
+            Log.Instance.Warn("---Begin: GetRates");
             DateTime sDate = searchFilters.PuDate;
             DateTime eDate = searchFilters.DoDate;
 
