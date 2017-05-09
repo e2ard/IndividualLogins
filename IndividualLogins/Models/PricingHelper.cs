@@ -1,5 +1,6 @@
 ﻿using IndividualLogins.Controllers.App_Code;
 using IndividualLogins.Models;
+using IndividualLogins.Models.NlogTest.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -45,6 +46,7 @@ namespace IndividualLogins.Models
             SiteBase site = null;
 
             Rates rates = new Rates();
+
             pdfRates = rates.GetRates(Sf, out site);
             
             for (int i = 0; i < Classes.Count(); i++)
@@ -74,7 +76,7 @@ namespace IndividualLogins.Models
         public string Excecute()
         {
             Dictionary<string, Dictionary<string, JOffer>> pdfRates = null;
-            string brokerName = GetBrokerName(Sf.Location);
+            string brokerName = GetBrokerName(Sf.Source);
             SiteBase site = null;
 
             Rates rates = new Rates();
@@ -127,32 +129,39 @@ namespace IndividualLogins.Models
             float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
 
 
-            for (int i = 0; i < 30; i++)
+            try
             {
-                if (i < categoryOffers.Count())
+                for (int i = 0; i < 30; i++)
                 {
-                    float gmPrice = categoryOffers.ElementAt(i).gmPrice;
-                    float price = categoryOffers.ElementAt(i).price;
-                    float fusePrice = fuseRates.ElementAt(i);
-                    float priceDiff = price - gmPrice;
-                    lastAddedPrice = CalculatePriceJIG(gmPrice, price, fusePrice);
+                    if (i < categoryOffers.Count())
+                    {
+                        float gmPrice = categoryOffers.ElementAt(i).gmPrice;
+                        float price = categoryOffers.ElementAt(i).price;
+                        float fusePrice = fuseRates.ElementAt(i);
+                        int dayIndex = i + 1;
 
-                    if (brokerName.Equals("JIG"))
-                        priceList.Add(!((categoryOffers.ElementAt(i).GetSupplier() != null? categoryOffers.ElementAt(i).GetSupplier().Contains("glob") : false) && priceDiff < 2.5f && priceDiff > 0)
-                            ? lastAddedPrice
-                            : fusePrice);
-
-                    if (brokerName.Equals("CTR"))
-                        priceList.Add(CalculatePriceCTR(gmPrice, price, fusePrice));
+                        if (brokerName.Equals("JIG"))
+                        {
+                            lastAddedPrice = CalculatePriceJIG(gmPrice, price, fusePrice);
+                            lastAddedPrice = lastAddedPrice > avg * dayIndex ? lastAddedPrice : avg * dayIndex;
+                            priceList.Add(lastAddedPrice);
+                        }
+                        else
+                        {
+                            lastAddedPrice = CalculatePriceCTR(gmPrice, price, fusePrice);
+                            lastAddedPrice = lastAddedPrice > avg * dayIndex? lastAddedPrice : avg * dayIndex;
+                            priceList.Add(lastAddedPrice);
+                        }
+                    }
+                    else
+                    {
+                        priceList.Add(lastAddedPrice += avg);
+                    }
                 }
-                else
-                {
-                    //if (brokerName.Equals("JIG"))
-                     priceList.Add(avg > 0? lastAddedPrice += avg: fuseRates.ElementAt(i));// if supplier price is 0
-
-                    //if (brokerName.Equals("CTR"))
-                    //    priceList.Add(CalculatePriceCTR(gmPrice, price, fusePrice));
-                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("---CalculatePrices Message:" + ex.Message + "Trace: " + ex.StackTrace);
             }
             return priceList;
         }
@@ -194,6 +203,7 @@ namespace IndividualLogins.Models
                         lastAddedPrice = categoryOffers.ElementAt(i).price * classCoef - categoryOffers.ElementAt(i).price * classCoef / 10;
                         priceList.Add(lastAddedPrice);
                     }
+
                     if (brokerName.Equals("CTR"))
                     {
                         lastAddedPrice = categoryOffers.ElementAt(i).price * 0.95f;
@@ -205,8 +215,7 @@ namespace IndividualLogins.Models
             }
             return priceList;
         }
-
-        
+                
         private float BrokerDiscount(string brokerName)
         {
 
@@ -227,7 +236,7 @@ namespace IndividualLogins.Models
                 }
             }
 
-            return avgSum / sumNum > 0? avgSum / sumNum: 14 ;
+            return avgSum / sumNum > 0? avgSum / sumNum: 20 ;
         }
         private void SetBrokerDiscounts()
         {

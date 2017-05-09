@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using IndividualLogins.Models.NlogTest.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -86,9 +87,10 @@ namespace IndividualLogins.Controllers.App_Code
                     return offersFound;
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 Debug.WriteLine("Offers not found");
+                Log.Instance.Error("--- " + ex.Message + "\n " + ex.InnerException + "\n" + ex.StackTrace);
                 return null;
             }
         }
