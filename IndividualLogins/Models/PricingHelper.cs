@@ -143,13 +143,13 @@ namespace IndividualLogins.Models
                         if (brokerName.Equals("JIG"))
                         {
                             lastAddedPrice = CalculatePriceJIG(gmPrice, price, fusePrice);
-                            lastAddedPrice = lastAddedPrice > avg * dayIndex ? lastAddedPrice : avg * dayIndex;
+                            lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f? lastAddedPrice : avg * dayIndex;
                             priceList.Add(lastAddedPrice);
                         }
                         else
                         {
                             lastAddedPrice = CalculatePriceCTR(gmPrice, price, fusePrice);
-                            lastAddedPrice = lastAddedPrice > avg * dayIndex? lastAddedPrice : avg * dayIndex;
+                            lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f? lastAddedPrice : avg * dayIndex;
                             priceList.Add(lastAddedPrice);
                         }
                     }
@@ -437,7 +437,7 @@ namespace IndividualLogins.Models
                         else
                             overridePrice = fusePrice + Math.Abs(priceDiff) * 0.25f;
                     else
-                        overridePrice = fusePrice + Math.Abs(priceDiff) * 0.52f;
+                        overridePrice = fusePrice + Math.Abs(priceDiff) * 0.36f;
                     //overridePrice = fusePrice - priceDiff * gmPrice / fusePrice * 0.5f;
                 }
                 else
@@ -448,8 +448,8 @@ namespace IndividualLogins.Models
             if ((price == 0 || gmPrice == 0) || (price - gmPrice < 1.5f) && price - gmPrice > 0 || overridePrice < 0)
                 return fusePrice;
 
-            if (overridePrice < price * 0.67f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
-                return price * 0.69f;
+            if (overridePrice < price * 0.62f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
+                return price * 0.66f;
 
             return overridePrice;
         }
