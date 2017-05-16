@@ -14,7 +14,7 @@ using System.Threading;
 
 namespace IndividualLogins.Models
 {
-    class PricingHelper
+    public class PricingHelper
     {
         PricingModel Sf;
         Dictionary<string, float> brokerDiscounts;
@@ -87,11 +87,12 @@ namespace IndividualLogins.Models
                 for (int i = 0; i < Classes.Count(); i++)
                 {
                     List<JOffer> categoryOffers = GetMiniRatesList(pdfRates, Classes[i].ClassName);
+                    List<JOffer> higherCategoryOffers = Classes.Count() > i + 2? GetMiniRatesList(pdfRates, Classes[i+ 2].ClassName): null;
 
                     CsvHelper csvHelper = new CsvHelper(Classes[i].ClassLinkId);
 
                     List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
-                    List<float> priceList = CalculatePrices(categoryOffers, fuseRates, brokerName);
+                    List<float> priceList = CalculatePrices(categoryOffers, higherCategoryOffers, fuseRates, brokerName);
 
                     string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
                     List<string> brokers = csvHelper.GetFuseBrokers();
@@ -119,7 +120,7 @@ namespace IndividualLogins.Models
             return rates.CreatePdf(site, pdfRates);
         }
 
-        private List<float> CalculatePrices(List<JOffer> categoryOffers, List<float> fuseRates, string brokerName)
+        public List<float> CalculatePrices(List<JOffer> categoryOffers, List<JOffer> higherOffers, List<float> fuseRates, string brokerName)
         {
             if (fuseRates.Count() == 0)
                 return null;
@@ -128,7 +129,6 @@ namespace IndividualLogins.Models
             float lastAddedPrice = 0;
             float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
 
-
             try
             {
                 for (int i = 0; i < 30; i++)
@@ -136,7 +136,14 @@ namespace IndividualLogins.Models
                     if (i < categoryOffers.Count())
                     {
                         float gmPrice = categoryOffers.ElementAt(i).gmPrice;
-                        float price = categoryOffers.ElementAt(i).price;
+                        float price = categoryOffers.ElementAt(i).price ;
+
+                        price = price > 0 
+                            ? price 
+                            : higherOffers.Count() > i
+                                ? higherOffers.ElementAt(i).price
+                                : 0;
+
                         float fusePrice = fuseRates.ElementAt(i);
                         int dayIndex = i + 1;
 
@@ -236,7 +243,7 @@ namespace IndividualLogins.Models
                 }
             }
 
-            return avgSum / sumNum > 0? avgSum / sumNum: 20 ;
+            return avgSum / sumNum > 0? avgSum / sumNum: 22 ;
         }
         private void SetBrokerDiscounts()
         {
@@ -389,7 +396,7 @@ namespace IndividualLogins.Models
 
         private float CalculatePriceJIG(float gmPrice, float price, float fusePrice)
         {
-            if (price == 0)
+            if ((price == 0) ||  gmPrice == 0)
                 return fusePrice;
 
             float overridePrice = price;
