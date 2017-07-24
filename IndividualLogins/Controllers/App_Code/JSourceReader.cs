@@ -67,15 +67,20 @@ namespace IndividualLogins.Controllers.App_Code
                     client.Headers.Add("Accept", "*/*");
                     client.Headers.Add("Accept-Language", "en-gb,en;q=0.5");
                     client.Headers.Add("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+                    
                     if (addProxy)
                     {
                         WebProxy proxy = new WebProxy(ipStr, port);
                         proxy.Credentials = new NetworkCredential(user, pass);
                         client.Proxy = proxy;
                     }
-                    string source = client.DownloadString(site);
-                    //retrieve page source tags
-                    HtmlDocument doc = new HtmlDocument();
+                    client.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
+                    var responseStream = new GZipStream(client.OpenRead(site), CompressionMode.Decompress);
+                    var reader = new StreamReader(responseStream);
+                    string source = reader.ReadToEnd();
+
+                    //string source = client.DownloadString(site);
+                    HtmlDocument doc = new HtmlDocument();//retrieve page source tags
                     doc.LoadHtml(source);
 
                     string[] carOfferStrgs = { "car-result group ", "search-result txt-grey-7 ", "carResultDiv " };
@@ -439,198 +444,6 @@ namespace IndividualLogins.Controllers.App_Code
             reader.Close();
             response.Close();
             return offers;
-        }
-
-        public string GetBookingsSource(string site, string site2)
-        {
-            Console.WriteLine("-->RequestStarted");
-            HttpWebResponse response = null;
-            try
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(site2);
-                if (addProxy)
-                {
-                    WebProxy proxy = new WebProxy(ipStr, port);
-                    proxy.Credentials = new NetworkCredential(user, pass);
-                    request.Proxy = proxy;
-                }
-                request.KeepAlive = true;
-                request.Accept = "application/json, text/javascript, */*; q=0.01";
-                request.Headers.Add("X-Requested-With", @"XMLHttpRequest");
-                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36";
-                request.Referer = site;
-                request.Headers.Set(HttpRequestHeader.AcceptEncoding, "gzip, deflate, sdch, br");
-                request.Headers.Set(HttpRequestHeader.AcceptLanguage, "lt,en-US;q=0.8,en;q=0.6,ru;q=0.4,pl;q=0.2");
-                request.Headers.Set(HttpRequestHeader.Cookie, @"sLang=lt; _gat_UA-4564791-17=1; referrers=www.bookinggroup.com; _dc_gtm_UA-4564791-2=1; _dc_gtm_UA-4564791-17=1; _dc_gtm_UA-4564791-20=1; _gat_UA-4564791-2=1; _gat_UA-4564791-20=1; has_js=1; _ga=GA1.2.871746488.1481921759; uparams=QueryF");
-
-                response = (HttpWebResponse)request.GetResponse();
-                return ReadResponse(response);
-            }
-
-            catch (WebException we)
-            {
-                if (we.Status == WebExceptionStatus.ProtocolError) response = (HttpWebResponse)we.Response;
-                //else return false;
-            }
-            catch (Exception e)
-            {
-                if (response != null) response.Close();
-                //return false;
-            }
-            Console.WriteLine("--<RequestFinished");
-            return null;
-        }
-
-        public string GetExpediaSource(string body)
-        {
-            HttpWebResponse response = null;
-            try
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://www.expedia.it/carsearch/pickup/list/results");
-                if (addProxy)
-                {
-                    WebProxy proxy = new WebProxy(ipStr, port);
-                    proxy.Credentials = new NetworkCredential(user, pass);
-                    request.Proxy = proxy;
-                }
-                request.KeepAlive = true;
-                request.Headers.Set(HttpRequestHeader.Pragma, "no-cache");
-                request.Headers.Set(HttpRequestHeader.CacheControl, "no-cache");
-                request.Accept = "*/*";
-                request.Headers.Add("Origin", @"https://www.expedia.it");
-                request.Headers.Add("X-Requested-With", @"XMLHttpRequest");
-                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36";
-                request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                request.Referer = "https://www.expedia.it/carsearch?dagv=1&subm=1&fdrp=&styp=2&locn=Fiumicino,%20Italia&loc2=Fiumicino,%20Italia&date1=05/01/2017&date2=08/01/2017&vend=&kind=1&time1=1200PM&time2=1200PM&ttyp=2&acop=2&rdus=10&rdct=1&drid1=179111&dlat=41.764942&dlon=12.228037";
-                request.Headers.Set(HttpRequestHeader.AcceptEncoding, "gzip, deflate, br");
-                request.Headers.Set(HttpRequestHeader.AcceptLanguage, "lt,en-US;q=0.8,en;q=0.6,ru;q=0.4,pl;q=0.2");
-                request.Headers.Set(HttpRequestHeader.Cookie, @"MC1=GUID=15f0bb182a1d4d4fae2dad2ffd44bdf0; abucket=CgUB41fucrIEy0HIF7DnAg==; MediaCookie=0%7C2859%2C2829%2CBKC%2C27485%7C2859%2C2829%2CBKC%2C27482; tpid=v.1,8; iEAPID=0; JSESSION=80fb2de0-99de-4fe4-8b84-98ab333b8142; AMCVS_C00802BE5330A8350A490D4C%40AdobeOrg=1; qualtrics_sample=false; aspp=v.1,0|||||||||||||; _cc=AbdtcyELE5sy1OuU1%2FQALcqv; IAID=70430741-4257-4054-9f67-1b61a99215a9; AMCV_C00802BE5330A8350A490D4C%40AdobeOrg=-1248264605%7CMCIDTS%7C17152%7CMCMID%7C02813494840441441920212387430884768964%7CMCAAMLH-1482519671%7C6%7CMCAAMB-1482519671%7CNRX38WO0n5BH8Th-nqAG_A%7CMCOPTOUT-1481922071s%7CNONE%7CMCAID%7CNONE; s_sq=%5B%5BB%5D%5D; cesc=%7B%7D; s_ppn=page.Car-Search; s_ppvl=page.Car-Search%2C10%2C8%2C702%2C1304%2C702%2C1366%2C768%2C1%2CP; s_cc=true; utagdb=true; utag_main=v_id:01590901eaa9001a9b3b535ddd070506d00240650086e$_sn:1$_ss:0$_pn:5%3Bexp-session$_st:1481919041905$ses_id:1481914837673%3Bexp-session$dc_visit:1$dc_event:2%3Bexp-session$dc_region:eu-central-1%3Bexp-session; rlt_marketing_code_cookie={}; _ga=GA1.2.1370767347.1481914841; _gat_ua=1; _tq_id.TV-721872-1.19dc=757f75b03184cc01.1481914841.0.1481917242..; JSESSIONID=4F9A7F3AC132A604BA6DBF5705065D46; linfo=v.4,|0|0|255|1|0||||||||1040|0|0||0|0|0|-1|-1; user=; minfo=; accttype=; s_ppv=page.Car-Search%2C10%2C8%2C702%2C1304%2C702%2C1366%2C768%2C1%2CP; HMS=C6AEBE3E-6CE2-4481-9531-308DA3101B92; HSEWC=0");
-
-                request.Method = "POST";
-                request.ServicePoint.Expect100Continue = false;
-                byte[] postBytes = System.Text.Encoding.UTF8.GetBytes(body);
-                request.ContentLength = postBytes.Length;
-                Stream stream = request.GetRequestStream();
-                stream.Write(postBytes, 0, postBytes.Length);
-                stream.Close();
-
-                response = (HttpWebResponse)request.GetResponse();
-
-
-                return ReadResponse(response);
-
-            }
-            catch (WebException we)
-            {
-                if (we.Status == WebExceptionStatus.ProtocolError) response = (HttpWebResponse)we.Response;
-                //else return false;
-            }
-            catch (Exception e)
-            {
-                if (response != null) response.Close();
-                //return false;
-            }
-            Console.WriteLine("--<RequestFinished");
-            return null;
-        }
-
-        public string RemoveSpecialCharacters(string s)
-        {
-            Console.WriteLine("-->RemoveSpecialCharactersStarted");
-            //StringBuilder sb = new StringBuilder();
-            string sb = string.Empty;
-            try
-            {
-                if (s != null)
-                {
-                    int len = s.Length;
-                    char[] s2 = new char[len];
-                    int i2 = 0;
-                    for (int i = 0; i < len; i++)
-                    {
-                        char c = s[i];
-                        if (c != '\r' && c != '\n' && c != '\t')
-                            s2[i2++] = c;
-
-                    }
-                    sb = new String(s2, 0, i2);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.Write("EXCEPTION");
-
-            }
-
-            sb = sb.Replace(@"\", "");
-
-            Console.WriteLine("--<RemoveSpecialCharactersFinished");
-            return sb.ToString();
-        }
-
-        public string ReadResponse(HttpWebResponse response)
-        {
-            Console.WriteLine("-->ReadResponseStarted");
-            using (Stream responseStream = response.GetResponseStream())
-            {
-                Stream streamToRead = responseStream;
-                if (response.ContentEncoding.ToLower().Contains("gzip"))
-                {
-                    streamToRead = new GZipStream(streamToRead, CompressionMode.Decompress);
-                }
-                else if (response.ContentEncoding.ToLower().Contains("deflate"))
-                {
-                    streamToRead = new DeflateStream(streamToRead, CompressionMode.Decompress);
-                }
-
-                using (StreamReader streamReader = new StreamReader(streamToRead, Encoding.UTF8))
-                {
-                    Console.WriteLine("--<ReadResponse Finished ");
-                    return streamReader.ReadToEnd();
-                }
-            }
-        }
-
-        public List<JOffer> GetAtlassOffers(string siteSource)
-        {
-            Console.WriteLine("-->GetOfferCount Started");
-            try
-            {
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(siteSource);
-                Console.WriteLine("--<GetOffer attr Started");
-                HtmlNodeCollection offersFound = doc.DocumentNode.SelectNodes(".//div[@data-price]");
-
-                //HtmlNode offerFound = doc.DocumentNode.SelectNodes(".//div[@data-price]");
-
-                List<JOffer> offers = new List<JOffer>();
-                if (offersFound != null)
-                {
-                    foreach (HtmlNode divNode in offersFound)
-                    {
-                        HtmlAttribute price = divNode.Attributes["data-price"];
-                        HtmlAttribute category = divNode.Attributes["data-acriss"];
-                        //HtmlAttribute supplier = supplierInfo.Attributes["data-acriss"];
-                        string supplier = divNode.SelectNodes(".//div[@class='overlay']//ul//li//a").ElementAt(2).Attributes["href"].Value.Split('/').Last();
-
-                        JOffer offer = new JOffer(Atlass.GetSupplier(supplier), price.Value);
-
-                        offer.SetCategory(category.Value);
-                        offers.Add(offer);
-                    }
-                    Console.WriteLine("--<GetOffer attr Finished");
-                    return offers;
-                }
-                else
-                {
-                    return offers;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("Offers not found");
-                return null;
-            }
         }
     }
 }
