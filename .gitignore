@@ -242,3 +242,4 @@ ModelManifest.xml
 .fake/
 /IndividualLogins/Models/LoginsModel
 /IndividualLogins/pdf
+/IndividualLogins/excel

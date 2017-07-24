@@ -52,14 +52,19 @@ namespace IndividualLogins.Models
             for (int i = 0; i < Classes.Count(); i++)
             {
                 List<JOffer> categoryOffers = GetMiniRatesList(pdfRates, Classes[i].ClassName);
+                List<JOffer> higherCategoryOffers = Classes.Count() > i + 2 ? GetMiniRatesList(pdfRates, Classes[i + 2].ClassName) : null;
+
                 CsvHelper csvHelper = new CsvHelper();
 
                 brokerName = "JIG";
-                List<float> priceList = InitiatePrices(categoryOffers, brokerName, Classes[i].ClassName);
+                List<float> priceList = InitiatePrices(categoryOffers, higherCategoryOffers, brokerName, Classes[i].ClassName);
+
+                Log.Instance.Info("INITIATE PRICES:");
+                OutputRates(priceList, null, Classes[i].ClassName);
                 string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
                 
                 brokerName = "CTR";
-                priceList = InitiatePrices(categoryOffers, brokerName, Classes[i].ClassName);
+                priceList = InitiatePrices(categoryOffers, higherCategoryOffers, brokerName, Classes[i].ClassName);
                 body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList, body);
 
                 Thread.Sleep(800);
@@ -71,6 +76,16 @@ namespace IndividualLogins.Models
                 Thread.Sleep(1000);
             }
             return rates.CreatePdf(site, pdfRates);
+        }
+
+        public void OutputRates(List<float> priceList, List<float> oldPriceList, string className)
+        {
+            Log.Instance.Info("---NEW PRICELIST:" + className);
+            for (int i = 0; i < priceList.Count; i++)
+            {
+                float oldPrice = oldPriceList != null && oldPriceList.Count > i ? oldPriceList.ElementAt(i) : -1;
+                Log.Instance.Info("--->" + (i+1) + ": " + priceList.ElementAt(i) + " old: " + oldPrice);
+            }
         }
 
         public string Excecute()
@@ -93,6 +108,7 @@ namespace IndividualLogins.Models
 
                     List<float> fuseRates = csvHelper.GetFuseRates(brokerName);
                     List<float> priceList = CalculatePrices(categoryOffers, higherCategoryOffers, fuseRates, brokerName);
+                    OutputRates(priceList, fuseRates, Classes[i].ClassName);
 
                     string body = csvHelper.GenerateRateString(Sf.PuDate, Sf.DoDate, brokerName, priceList);
                     List<string> brokers = csvHelper.GetFuseBrokers();
@@ -173,7 +189,7 @@ namespace IndividualLogins.Models
             return priceList;
         }
 
-        private List<float> InitiatePrices(List<JOffer> categoryOffers, string brokerName, string className)
+        private List<float> InitiatePrices(List<JOffer> categoryOffers, List<JOffer> higherOffers, string brokerName, string className)
         {
             List<float> priceList = new List<float>();
             float classCoef = 1;
@@ -201,19 +217,31 @@ namespace IndividualLogins.Models
             float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
             float lastAddedPrice = 0;
 
+            int dayIndex = 0;
             for (int i = 0; i < 30; i++)
             {
+                
                 if (i < categoryOffers.Count()){
+                    dayIndex = i + 1;
+                float price = categoryOffers.ElementAt(i).price;
+                price = price > 0
+                    ? price
+                    : higherOffers.Count() > i
+                        ? higherOffers.ElementAt(i).price
+                        : 0;
+
                     if (brokerName.Equals("JIG"))
                     {
-                        classCoef = categoryOffers.ElementAt(i).price > 100 ? classCoef += 0.01f : classCoef -= 0.01f;
-                        lastAddedPrice = categoryOffers.ElementAt(i).price * classCoef - categoryOffers.ElementAt(i).price * classCoef / 10;
+                        classCoef = price > 100 ? classCoef += 0.01f : classCoef -= 0.01f;
+                        lastAddedPrice = price * classCoef - price * classCoef / 10;
+                        lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f ? lastAddedPrice : avg * dayIndex;
                         priceList.Add(lastAddedPrice);
                     }
 
                     if (brokerName.Equals("CTR"))
                     {
-                        lastAddedPrice = categoryOffers.ElementAt(i).price * 0.95f;
+                        lastAddedPrice = price * 0.95f;
+                        lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f ? lastAddedPrice : avg * dayIndex;
                         priceList.Add(lastAddedPrice);
                     }
                 }
@@ -415,7 +443,7 @@ namespace IndividualLogins.Models
                                 if (priceDiff < 1)
                                 {
                                     if (priceDiff == 0)
-                                        overridePrice = fusePrice - 0.01f;//if price are equal
+                                        overridePrice = fusePrice - 0.04f;//if price are equal
                                     else
                                         overridePrice = fusePrice - priceDiff * 0.97f;
                                 }
@@ -432,7 +460,7 @@ namespace IndividualLogins.Models
                         overridePrice = fusePrice - priceDiff * 0.6f;
                 }
                 else
-                    overridePrice = price * 0.75f - priceDiff * 0.3f;
+                    overridePrice = price * 0.73f - priceDiff * 0.3f;
             }
             else
             {
@@ -448,14 +476,14 @@ namespace IndividualLogins.Models
                     //overridePrice = fusePrice - priceDiff * gmPrice / fusePrice * 0.5f;
                 }
                 else
-                    overridePrice = price * 0.8f;
+                    overridePrice = price * 0.72f;
             }
 
 
             if ((price == 0 || gmPrice == 0) || (price - gmPrice < 1.5f) && price - gmPrice > 0 || overridePrice < 0)
                 return fusePrice;
 
-            if (overridePrice < price * 0.62f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
+            if (overridePrice < price * 0.66f || fusePrice < 0 || gmPrice < fusePrice || (gmPrice == 0 && price > 0))//attention (latest change)
                 return price * 0.66f;
 
             return overridePrice;

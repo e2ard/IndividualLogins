@@ -11,7 +11,6 @@ using System.Web.Mvc;
 
 namespace IndividualLogins.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         PricingToolDal dal = new PricingToolDal();
@@ -56,11 +55,14 @@ namespace IndividualLogins.Controllers
                 return "";
             }
         }
-        
-        
+
+        [Authorize(Roles = "Admin, Edit, Preview")]
         public ActionResult News()
         {
-            return View();
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                return View(ctx.News.ToList());
+            }
         }
 
         public JsonResult GetLocations(int? country)

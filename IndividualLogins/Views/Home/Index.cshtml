@@ -20,31 +20,40 @@
                 $("#divLoadingExcel").html("<image src='../Content/ajax-loader.gif' style='width: 16px; height: 16px;' alt='Loading, please wait' />");
 
         }
+
+        function GetResults(isPdf) {
+            if ($('form').valid()) {
+                $('#IsPdf').val(isPdf);
+                $.ajax({
+                    url: '@Url.Action("GetResultFileName")',
+                    type: "POST",
+                    data: $('form').serialize(),
+                    success: function (result) {
+                        StopLoading();
+                        if (result.length > 0)
+                            window.open(result, '_blank');
+                        return false;
+                    },
+                    error: function (result) {
+                        StopLoading();
+                        alert("Failed" + result);
+                        return false;
+                    }
+                });
+                StartLoading(true);
+                return false;
+            }
+        }
         $(document).ready(function () {
             $('#pdfBtn').click(function () {
-                if ($('form').valid()){
-                    $.ajax({
-                        url: '@Url.Action("GetResultFileName")',
-                        type: "POST",
-                        data: $('form').serialize(),
-                        success: function (result) {
-                            StopLoading();
-                            if (result.length > 0)
-                                window.open(result, '_blank');
-                            return false;
-                        },
-                        error: function (result) {
-                            StopLoading();
-                            alert("Failed" + result);
-                            return false;
-                        }
-                    });
-                    StartLoading(true);
-                    return false;
-                }
+                GetResults(1);
+            });
+
+            $('#excelBtn').click(function () {
+                GetResults(0);
             });
         });
-    
+
         function AddDays(date, addDays) {
             var dat = new Date(date.valueOf());
             dat.setDate(dat.getDate() + addDays);
@@ -74,7 +83,7 @@
         }
 
         $(document).ready(function () {
-            
+
             $('#PuDate').datetimepicker({
                 format: 'DD-MM-YYYY',
                 minDate: AddDays(new Date(), -1)
@@ -170,6 +179,8 @@
     </div>
     @using (Html.BeginForm())
     {
+        @Html.HiddenFor(model => model.IsPdf)
+
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true)
         <div class="form-group row">
@@ -206,14 +217,20 @@
            
         </div>
 
-        <div class="form-group col-md-12">
-            <button id="pdfBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300; width:130px">
-                Get PDF<span id="divLoading" style="margin-left: 5px;"></span>
-            </button>
+        <div class="col-md-12">
+                <div class="form-group row">
+                    <div class="col-md-6">
 
-            @*<a href="@Url.Action("ExcelPackageCreate")" id="excelBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300;width:130px">
-                Get EXCEL<span id="divLoadingExcel" style="margin-left: 5px;"></span>
-            </a>*@
-        </div>
+                        <button id="pdfBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300; width:130px">
+                            Get PDF<span id="divLoading" style="margin-left: 5px;"></span>
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button id="excelBtn" type="button" class="btn btn-lg btn-xlarge" style="background-color: #a9d300;width:130px">
+                            Get EXCEL<span id="divLoadingExcel" style="margin-left: 5px;"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
     }
 </div>
