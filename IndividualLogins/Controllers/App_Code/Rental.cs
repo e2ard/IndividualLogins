@@ -19,9 +19,13 @@ namespace IndividualLogins.Controllers.App_Code
         {
             const string filterTransm = "&filterTransmission=";
             if (!this.siteName.Contains(transmission))
+            {
                 return string.Concat(this.siteName, filterTransm + transmission);
+            }
             else
+            {
                 return this.siteName;
+            }
         }
 
         public List<string> GetGeneratedLinks()

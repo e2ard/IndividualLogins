@@ -19,8 +19,6 @@ namespace IndividualLogins.Models
         }
         public DbSet<Update> Updates { get; set; }
         public DbSet<Location> Locations { get; set; }
-
-        public DbSet<News> News { get; set; }
     }
 
     public class Update
@@ -42,14 +40,6 @@ namespace IndividualLogins.Models
     public class Location
     {
         public int LocationId { get; set; }
-        [System.ComponentModel.DataAnnotations.Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public bool IsAvailable { get; set; }
-    }
-
-    public class News
-    {
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
         public string Name { get; set; }

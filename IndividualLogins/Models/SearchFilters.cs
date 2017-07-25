@@ -28,7 +28,6 @@ namespace IndividualLogins.Models
         public DateTime PuDate { get; set; }
         public TimeSpan PuTime { get; set; }
 
-        public int? IsPdf { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var results = new List<ValidationResult>();
