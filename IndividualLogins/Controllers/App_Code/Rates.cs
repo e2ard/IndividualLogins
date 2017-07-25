@@ -64,7 +64,7 @@ namespace IndividualLogins.Controllers.App_Code
                     for (int i = 0; i < offers.Count; i++)
                     {
                         myWorksheet.Cells[rowNum, i + 2].Value = offers.ElementAt(i).GetOffer();
-                        myWorksheet.Row(rowNum).Height = 35;
+                        myWorksheet.Row(rowNum).Height = 50;
                     }
                     ++rowNum;
                 }

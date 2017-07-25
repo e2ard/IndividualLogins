@@ -14,7 +14,7 @@
 <body>
    @if (User.IsInRole("Preview") || User.IsInRole("Edit") || User.IsInRole("Admin"))
    {
-    <div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar navbar-default">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -46,7 +46,7 @@
         </div>
     </div>
    }
-    <div class="container body-content" style="padding-bottom:50px">
+    <div class="container body-content">
         @RenderBody()
         @*<hr />
     <footer>

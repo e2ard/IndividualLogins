@@ -2,6 +2,11 @@
 @{
     ViewBag.Title = "Register";
 }
+<style>
+    label.control-label{
+        color:black;
+    }
+</style>
 <h2>@ViewBag.Title.</h2>
 
 @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
@@ -37,10 +42,9 @@
     </div>
 
     <div class="form-group">
-        @Html.Label("user Role", new { @class = "col-md-2 control-label" })
+        @Html.Label("User role", new { @class = "col-md-2 control-label" })
         <div class="col-md-10">
-            @*@Html.DropDownList("Name")*@
-            @Html.DropDownList("UserRoles", (SelectList)ViewBag.Name, " ")
+            @Html.DropDownList("UserRoles", (SelectList)ViewBag.Name)
         </div>
     </div>
 

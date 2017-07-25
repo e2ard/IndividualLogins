@@ -37,14 +37,13 @@ namespace IndividualLogins.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    Log.Instance.Warn("---: GetResultFileName");
                     DbUpdates.PdfCreated(searchFilters, User.Identity.Name);
 
                     return fileName = new Rates().GetPdfLocation(site, searchFilters);
                 }
                 else
                 {
-                    Log.Instance.Warn("---else: GetResultFileName");
+                    Log.Instance.Warn("---ModelState not Valid: GetResultFileName");
 
                     return "";
                 }
@@ -59,10 +58,7 @@ namespace IndividualLogins.Controllers
         [Authorize(Roles = "Admin, Edit, Preview")]
         public ActionResult News()
         {
-            using (RatesDBContext ctx = new RatesDBContext())
-            {
-                return View(ctx.News.ToList());
-            }
+            return View();
         }
 
         public JsonResult GetLocations(int? country)
