@@ -87,6 +87,42 @@ namespace IndividualLogins
             {
                 var result1 = UserManager.AddToRole(userPreview.Id, "Preview");
             }
+
+            var userInit = new ApplicationUser();
+            userInit.UserName = "sales";
+            userInit.Email = "sales@pricingtool.eu";
+            string userInitPwd = "Sales123.";
+            chkUser = UserManager.Create(userInit, userInitPwd);
+
+            //Add default User to Role Preview   
+            if (chkUser.Succeeded)
+            {
+                var result1 = UserManager.AddToRole(userInit.Id, "Preview");
+            }
+
+            userInit = new ApplicationUser();
+            userInit.UserName = "vilnius";
+            userInit.Email = "vilnius@pricingtool.eu";
+            userInitPwd = "Vilnius56.";
+            chkUser = UserManager.Create(userInit, userInitPwd);
+
+            //Add default User to Role Preview   
+            if (chkUser.Succeeded)
+            {
+                var result1 = UserManager.AddToRole(userInit.Id, "Preview");
+            }
+
+            userInit = new ApplicationUser();
+            userInit.UserName = "riga";
+            userInit.Email = "vilnius@pricingtool.eu";
+            userInitPwd = "Riga89.";
+            chkUser = UserManager.Create(userInit, userInitPwd);
+
+            //Add default User to Role Preview   
+            if (chkUser.Succeeded)
+            {
+                var result1 = UserManager.AddToRole(userInit.Id, "Preview");
+            }
         }
     }
 }

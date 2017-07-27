@@ -190,6 +190,7 @@
     <Compile Include="Controllers\App_Code\Const.cs" />
     <Compile Include="Controllers\App_Code\EcoBookings.cs" />
     <Compile Include="Controllers\App_Code\Expedia.cs" />
+    <Compile Include="Controllers\App_Code\FullOffer.cs" />
     <Compile Include="Controllers\App_Code\JOffer.cs" />
     <Compile Include="Controllers\App_Code\JSourceReader.cs" />
     <Compile Include="Controllers\App_Code\PdfBuilder.cs" />

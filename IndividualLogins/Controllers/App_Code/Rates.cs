@@ -194,7 +194,7 @@ namespace IndividualLogins.Controllers.App_Code
                     offerMap[Thread.CurrentThread.Name == null ?
                         links.ElementAt(0) :
                         Thread.CurrentThread.Name] =
-                            reader.GetMapNorwegian(reader.GetNorwRates(Thread.CurrentThread.Name));
+                            reader.GetMap(reader.GetNorwRates(Thread.CurrentThread.Name));
                 });
                 thread.Name = links.ElementAt(index);
                 threads.Add(thread);
@@ -251,7 +251,7 @@ namespace IndividualLogins.Controllers.App_Code
                     offerMap[Thread.CurrentThread.Name == null ?
                         links.ElementAt(0) :
                         Thread.CurrentThread.Name] =
-                            reader.GetMapNorwegian(reader.GetScannerRates(Thread.CurrentThread.Name));
+                            reader.GetMap(reader.GetScannerRates(Thread.CurrentThread.Name));
                 });
                 thread.Name = links.ElementAt(index);
                 threads.Add(thread);

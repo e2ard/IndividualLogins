@@ -24,7 +24,7 @@ public class JOffer
     public string category;
     public string seats;
     public string carName;
-
+    public List<SupplierNew> Suppliers;
 
     private void SetSupplierPrice(string splr, string prc)
     {
@@ -51,25 +51,8 @@ public class JOffer
                 SetPrice(prc);
                 break;
         }
+        Suppliers = new List<SupplierNew>();
     }
-
-    public JOffer(string splr, string prc)
-    {
-        SetSupplierPrice(splr, prc);
-    }
-    public JOffer (string supplier, string price, string category, string transm, string seats)
-    {
-        SetSupplierPrice(supplier, price);
-        this.category = category;
-        transmission = transm.Trim().Split(' ')[0].Substring(0, 1);
-        this.seats = seats.Trim().Substring(0, 1);
-    }
-
-    private void SetBest()
-    {
-        bestSupplier = "Best";
-    }
-
     public JOffer(string splr, float prc)
     {
         switch (splr.ToUpper())
@@ -94,9 +77,35 @@ public class JOffer
                 SetPrice(prc);
                 break;
         }
+        Suppliers = new List<SupplierNew>();
     }
 
-    public JOffer() { }
+    public JOffer()
+    {
+        Suppliers = new List<SupplierNew>();
+    }
+    public JOffer(string splr, string prc)
+    {
+        SetSupplierPrice(splr, prc);
+        Suppliers = new List<SupplierNew>();
+    }
+    public JOffer(string supplier, string price, string category, string transm, string seats)
+    {
+        SetSupplierPrice(supplier, price);
+        this.category = category;
+        transmission = transm.Trim().Split(' ')[0].Substring(0, 1);
+        this.seats = seats.Trim().Substring(0, 1);
+        Suppliers = new List<SupplierNew>();
+    }
+
+    public void AddSupplier(SupplierNew sp)
+    {
+        Suppliers.Add(sp);
+    }
+    private void SetBest()
+    {
+        bestSupplier = "Best";
+    }
 
     public void SetSupplier(string splr)
     {
@@ -229,31 +238,51 @@ public class JOffer
             return strToCheck + "\n";
     }
 
-    protected string IsEmptySupplier(Supplier sup)
+    protected string IsEmptySupplier(SupplierNew sup)
     {
-        if (sup.name != null)
+        if (sup != null && sup.SupplierName != null)
         {
-            if (sup.name.Equals(""))
-                return "-" + " " + sup.price + "\n";
+            if (sup.SupplierName.Equals(""))
+                return "-" + " " + sup.Price + "\n";
             else
-                return (sup.name.Length > 3 ? sup.name.ToLower().Substring(0, 4) : sup.name.ToLower().Substring(0, 3)) + " " + sup.price + "\n";
+                return (sup.SupplierName.Length > 3 ? sup.SupplierName.ToLower().Substring(0, 4) : sup.SupplierName.ToLower().Substring(0, 3)) + " " + sup.Price + "\n";
         }
         return "";
     }
 
     public string GetOffer()
-    {// a price b gnPrice c crPrice
-        string offer = validate(supplier, price);//0
-        string gmOffer = validate(gmSupplier, gmPrice);//1
-        string crOffer = validate(crSupplier, crPrice);//2
-
-        List<Supplier> suppliers = new List<Supplier>() { new Supplier { name = supplier, price = price }, new Supplier { name = gmSupplier, price = gmPrice }, new Supplier { name = crSupplier, price = crPrice }, new Supplier { name = bestSupplier, price = bestPrice } };
-        string output = string.Empty;
-        foreach (Supplier sup in suppliers.OrderBy(t => t.price))
+    {
+        try
         {
-            output += IsEmptySupplier(sup);
+            string output = string.Empty;
+
+            SupplierNew gm = Suppliers.FirstOrDefault(s => s.SupplierType == 1);
+            SupplierNew cr = Suppliers.FirstOrDefault(s => s.SupplierType == 2);
+            SupplierNew best = Suppliers.FirstOrDefault(s => s.SupplierType == 3);
+            List<SupplierNew> suppliersNew = new List<SupplierNew>();//Suppliers.GroupBy(g => g.SupplierType, (key, s) => s.OrderBy(e => e.Price).First()).ToList();
+
+            if (Suppliers.Count(s => s.SupplierType == 4) > 1)
+                suppliersNew.AddRange(Suppliers.Where(s => s.SupplierType == 4).OrderBy(p => p.Price).Take(2).ToList());
+            else if(Suppliers.FirstOrDefault(s => s.SupplierType == 4) != null)
+                suppliersNew.Add(Suppliers.FirstOrDefault(s => s.SupplierType == 4));
+
+            if(gm != null)
+                suppliersNew.Add(gm);
+            if (cr != null)
+                suppliersNew.Add(cr);
+            if (best != null)
+                suppliersNew.Add(best);
+
+            foreach (SupplierNew sup in suppliersNew.OrderBy(t => t.Price))
+            {
+                output += IsEmptySupplier(sup);
+            }
+            return output;
         }
-        return output;
+        catch(Exception e)
+        {
+            return null;
+        }
     }
 
     private string MapCategory(string category)
@@ -336,20 +365,164 @@ public class JOffer
         return "skip";
     }
 
-    private string validate(string supplier, float price)
-    {
-        if (price > 10000 || price == 0)
-            return "";
-        if (supplier != null && supplier.Length < 3 && price > 0)
-            supplier = "best";
-        return supplier != null && supplier.Length > 3 ? char.ToUpper(supplier[0]).ToString() + char.ToLower(supplier[1]).ToString() + char.ToLower(supplier[2]).ToString() + " " + price : supplier + " " + price;
-    }
-
     public class Supplier
     {
         public string name;
         public float price;
     }
-}
 
+    public class SupplierNew
+    {
+        public string SupplierName;
+        public float Price;
+        public string Transmission;
+        public float Seats;
+        public string CarName;
+        public string Category;
+        public int SupplierType;
+
+        public SupplierNew()
+        {
+
+        }
+
+        public SupplierNew(string supplier, string price)
+        {
+            SupplierName = supplier;
+            Price = ParsePrice(price);
+            SupplierType = SetSupplierType(supplier);
+        }
+
+        public SupplierNew(string supplier, string price, string category, string transm, string seats)
+        {
+            SupplierName = supplier;
+            Category = category;
+            Transmission = transm.Trim().Split(' ')[0].Substring(0, 1);
+            Price = ParsePrice(price);
+            Seats = ParseSeats(seats.Trim().Substring(0, 1));
+            SupplierType = SetSupplierType(supplier);
+        }
+
+        private string MapCategory(string category)
+        {
+            switch (category)
+            {
+                case "MCMR":
+                case "MCMN":
+                case "MDMR":
+                    return "MiniM";
+                case "EDMR":
+                case "EDMN":
+                case "ECMN":
+                case "ECMR":
+                case "EWMR":
+                case "EWMH":
+                    return "EconomyM";
+                case "EDAR":
+                case "ECAR":
+                case "ECAN":
+                case "EDAN":
+                case "EWAR":
+                case "EWAH":
+                    return "EconomyA";
+                case "CDMR":
+                case "CCMR":
+                case "CDMN":
+                case "CCMN":
+                case "CWMR":
+                    return "CompactM";
+                case "CDAR":
+                case "CCAR":
+                case "CDAN":
+                case "CCAN":
+                case "CWAR":
+                    return "CompactA";
+                case "IDMR":
+                case "ICMR":
+                    return "IntermediateM";
+                case "IDAR":
+                case "ICAR":
+                    return "IntermediateA";
+                case "SDMR":
+                case "SCMR":
+                    return "StandardM";
+                case "SDAR":
+                case "SCAR":
+                    return "StandardA";
+                case "SWMR":
+                case "IWMR":
+                    return "EstateM";
+                case "SWAR":
+                case "IWAR":
+                    return "EstateA";
+                case "CFMR":
+                case "EFMR":
+                    return "CFMR";
+                case "CFAR":
+                case "EFAR":
+                    return "CFAR";
+                case "IFMR":
+                case "IFMD":
+                case "IFMN":
+                case "SFMR":
+                case "PFMR":
+                    return "SUVM";
+                case "IFAR":
+                case "IFAD":
+                case "IFAN":
+                case "SFAR":
+                case "PFAR":
+                    return "SUVA";
+                case "PWMR":
+                case "SVMR":
+                    return "People CarrierM";
+                default:
+                    //System.Diagnostics.Debug.WriteLine(category);
+                    break;
+            }
+            return "skip";
+        }
+
+        private float ParsePrice(string price)
+        {
+            if (!string.IsNullOrEmpty(price))
+                return float.Parse(Regex.Match(price.Replace(',', '.'), "\\d+\\.?\\d+").Value, CultureInfo.InvariantCulture);
+            else
+                return 0;
+        }
+
+        private float ParseSeats(string seats)
+        {
+            if (!string.IsNullOrEmpty(seats))
+                return float.Parse(Regex.Match(seats.Replace(',', '.'), "\\d+").Value, CultureInfo.InvariantCulture);
+            else
+                return 0;
+        }
+
+        private int SetSupplierType(string splr)
+        {
+            if (splr == null || splr.Equals(""))
+                return 3;
+
+            switch (splr.ToUpper())
+            {
+                case "GREEN MOTION":
+                case "GREENMOTION":
+                case "GREEN_MOTION":
+                    return 1;
+                case "CARSRENT":
+                case "CARS RENT":
+                case "CARS_RENT":
+                    return 2;
+                default:
+                    return 4;
+            }
+        }
+
+        public void SetCategory(string ctr)
+        {
+            Category = MapCategory(ctr);
+        }
+    }
+}
 

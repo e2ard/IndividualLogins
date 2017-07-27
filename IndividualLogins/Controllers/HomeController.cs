@@ -58,7 +58,10 @@ namespace IndividualLogins.Controllers
         [Authorize(Roles = "Admin, Edit, Preview")]
         public ActionResult News()
         {
-            return View();
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                return View(ctx.News.ToList());
+            }
         }
 
         public JsonResult GetLocations(int? country)

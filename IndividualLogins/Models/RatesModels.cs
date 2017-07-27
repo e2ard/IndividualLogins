@@ -30,11 +30,8 @@ namespace IndividualLogins.Models
         public int LocationId { get; set; }
         public string Username { get; set; }
         public DateTime UpdateTime { get; set; }
-
         public DateTime PickupTime { get; set; }
-
         public DateTime DropoffTime { get; set; }
-
         public string Params { get; set; }
 
     }
