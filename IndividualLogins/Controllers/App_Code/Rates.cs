@@ -7,6 +7,7 @@ using System.Threading;
 using IndividualLogins.Models.NlogTest.Models;
 using System.IO;
 using OfficeOpenXml;
+using static JOffer;
 
 namespace IndividualLogins.Controllers.App_Code
 {
@@ -63,10 +64,19 @@ namespace IndividualLogins.Controllers.App_Code
                     myWorksheet.Cells[rowNum, 1].Value = s.GetPuMonth() + "-" + s.GetPuDay() + "/" + doDate.AddDays(rowNum - 1).Day + "\n" + (rowNum - 1);
                     for (int i = 0; i < offers.Count; i++)
                     {
-                        myWorksheet.Cells[rowNum, i + 2].Value = offers.ElementAt(i).GetOffer();
                         myWorksheet.Row(rowNum).Height = 50;
+                        myWorksheet.Row(rowNum + 1).Height = 50;
+                        myWorksheet.Row(rowNum + 2).Height = 50;
+
+                        SupplierNew other = offers.ElementAt(i).Suppliers.FirstOrDefault(f => f.SupplierType == 4);
+                        SupplierNew gm = offers.ElementAt(i).Suppliers.FirstOrDefault(f => f.SupplierType == 1);
+                        SupplierNew cr = offers.ElementAt(i).Suppliers.FirstOrDefault(f => f.SupplierType == 2);
+
+                        myWorksheet.Cells[rowNum, i + 2].Value = (gm != null ? gm.ToString() : "");
+                        myWorksheet.Cells[rowNum + 1, i + 2].Value = (cr != null ? cr.ToString() : "");
+                        myWorksheet.Cells[rowNum + 2, i + 2].Value = (other != null ? other.ToString() : "");
                     }
-                    ++rowNum;
+                    rowNum += 3;
                 }
                 excelPackage.Save();// Saving the change...
                 return filename;

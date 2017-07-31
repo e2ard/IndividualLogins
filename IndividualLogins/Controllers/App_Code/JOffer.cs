@@ -259,12 +259,13 @@ public class JOffer
             SupplierNew gm = Suppliers.FirstOrDefault(s => s.SupplierType == 1);
             SupplierNew cr = Suppliers.FirstOrDefault(s => s.SupplierType == 2);
             SupplierNew best = Suppliers.FirstOrDefault(s => s.SupplierType == 3);
+            SupplierNew other = Suppliers.FirstOrDefault(s => s.SupplierType == 4);
             List<SupplierNew> suppliersNew = new List<SupplierNew>();//Suppliers.GroupBy(g => g.SupplierType, (key, s) => s.OrderBy(e => e.Price).First()).ToList();
 
-            if (Suppliers.Count(s => s.SupplierType == 4) > 1)
-                suppliersNew.AddRange(Suppliers.Where(s => s.SupplierType == 4).OrderBy(p => p.Price).Take(2).ToList());
-            else if(Suppliers.FirstOrDefault(s => s.SupplierType == 4) != null)
-                suppliersNew.Add(Suppliers.FirstOrDefault(s => s.SupplierType == 4));
+            //if (Suppliers.Count(s => s.SupplierType == 4) > 1)
+            //    suppliersNew.AddRange(Suppliers.Where(s => s.SupplierType == 4).OrderBy(p => p.Price).Take(2).ToList());
+            //else if(Suppliers.FirstOrDefault(s => s.SupplierType == 4) != null)
+                
 
             if(gm != null)
                 suppliersNew.Add(gm);
@@ -272,6 +273,8 @@ public class JOffer
                 suppliersNew.Add(cr);
             if (best != null)
                 suppliersNew.Add(best);
+            if (other != null)
+                suppliersNew.Add(other);
 
             foreach (SupplierNew sup in suppliersNew.OrderBy(t => t.Price))
             {
@@ -283,6 +286,21 @@ public class JOffer
         {
             return null;
         }
+    }
+
+    public List<SupplierNew> GetDistinctSuppliers()
+    {
+        SupplierNew gm = Suppliers.FirstOrDefault(s => s.SupplierType == 1);
+        SupplierNew cr = Suppliers.FirstOrDefault(s => s.SupplierType == 2);
+        SupplierNew best = Suppliers.FirstOrDefault(s => s.SupplierType == 3);
+        List<SupplierNew> suppliersNew = new List<SupplierNew>();//Suppliers.GroupBy(g => g.SupplierType, (key, s) => s.OrderBy(e => e.Price).First()).ToList();
+
+        if (Suppliers.Count(s => s.SupplierType == 4) > 1)
+            suppliersNew.AddRange(Suppliers.Where(s => s.SupplierType == 4).OrderBy(p => p.Price).Take(2).ToList());
+        else if (Suppliers.FirstOrDefault(s => s.SupplierType == 4) != null)
+            suppliersNew.Add(Suppliers.FirstOrDefault(s => s.SupplierType == 4));
+
+        return suppliersNew;
     }
 
     private string MapCategory(string category)
@@ -393,14 +411,15 @@ public class JOffer
             SupplierType = SetSupplierType(supplier);
         }
 
-        public SupplierNew(string supplier, string price, string category, string transm, string seats)
+        public SupplierNew(string supplier, string price, string category, string transm, string seats, string carName = null)
         {
             SupplierName = supplier;
             Category = category;
-            Transmission = transm.Trim().Split(' ')[0].Substring(0, 1);
+            Transmission = ParseTransmission(transm);
             Price = ParsePrice(price);
             Seats = ParseSeats(seats.Trim().Substring(0, 1));
             SupplierType = SetSupplierType(supplier);
+            CarName = carName;
         }
 
         private string MapCategory(string category)
@@ -480,9 +499,13 @@ public class JOffer
                     //System.Diagnostics.Debug.WriteLine(category);
                     break;
             }
-            return "skip";
+            return "skip" + category;
         }
 
+        private string ParseTransmission(string transm)
+        {
+            return string.IsNullOrEmpty(transm)? "": transm.Trim().Split(' ')[0].Substring(0, 1);
+        }
         private float ParsePrice(string price)
         {
             if (!string.IsNullOrEmpty(price))
@@ -522,6 +545,18 @@ public class JOffer
         public void SetCategory(string ctr)
         {
             Category = MapCategory(ctr);
+        }
+
+        public string ToString()
+        {
+            if (SupplierName != null)
+            {
+                if (SupplierName.Equals(""))
+                    return "-" + " " + Price + "\n";
+                else
+                    return (SupplierName.Length > 3 ? SupplierName.ToLower().Substring(0, 4) : SupplierName.ToLower().Substring(0, 3)) + " " + Price + "\n";
+            }
+            return "";
         }
     }
 }

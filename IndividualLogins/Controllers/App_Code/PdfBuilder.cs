@@ -7,6 +7,7 @@ using iTextSharp.text.pdf;
 using System.Collections.Generic;
 using System.Linq;
 using IndividualLogins.Models.NlogTest.Models;
+using static JOffer;
 
 namespace IndividualLogins.Controllers.App_Code
 {
@@ -128,44 +129,57 @@ namespace IndividualLogins.Controllers.App_Code
 
         public void AddRow(JOffer[] offers)
         {
-            PdfPCell cell = new PdfPCell(new Phrase(puMonth + "-" + puDay + "/" + doDate.AddDays(dayNum).Day + "\n" + dayNum, font));
-            dayNum++;
-            cell.HorizontalAlignment = 1;
-            cell.VerticalAlignment = 1;
-            table.AddCell(cell);
-
-            for (int i = 0; i < offers.Length; i++)
+            try
             {
-                cell = new PdfPCell(new Phrase(offers[i].GetOffer(), font));
-
-                var chunk = new Chunk(offers[i].GetOffer(), font);
-                AddSuppliers(offers[i].GetSupplier());
-                if(offers[i].GetBest() != null)
-                    AddSuppliers(offers[i].GetBest());
-                if (offers[i].GetCR() != null)
-                    AddSuppliers(offers[i].GetCR());
-                if (i == 0)
-                    chunk.SetAnchor(offers[i].GetSiteName());
-                cell.AddElement(chunk);
-                if (offers[i].price > offers[i].gmPrice && offers[i].gmPrice > 0)
-                {
-                    cell.BackgroundColor = new BaseColor(77, 148, 255);
-                    if (offers[i].price - offers[i].gmPrice < 2.5f && offers[i].price - offers[i].gmPrice > 0)
-                    {
-                        cell.BackgroundColor = new BaseColor(255, 255, 179);
-                        if (offers[i].price - offers[i].gmPrice < 1.5f && offers[i].price - offers[i].gmPrice > 0)
-                            cell.BackgroundColor = new BaseColor(128, 255, 128);
-
-                    }
-                }
-                else
-                {
-                    cell.BackgroundColor = new BaseColor(255, 102, 102);
-                }
-
+                PdfPCell cell = new PdfPCell(new Phrase(puMonth + "-" + puDay + "/" + doDate.AddDays(dayNum).Day + "\n" + dayNum, font));
+                dayNum++;
+                cell.HorizontalAlignment = 1;
+                cell.VerticalAlignment = 1;
                 table.AddCell(cell);
+
+                for (int i = 0; i < offers.Length; i++)
+                {
+                    cell = new PdfPCell(new Phrase(offers[i].GetOffer(), font));
+
+                    var chunk = new Chunk(offers[i].GetOffer(), font);
+
+                    List<SupplierNew> distSuppliers = offers[i].GetDistinctSuppliers();
+                    SupplierNew other = offers[i].Suppliers.FirstOrDefault(f => f.SupplierType == 4);
+                    SupplierNew best = offers[i].Suppliers.FirstOrDefault(f => f.SupplierType == 3);
+                    SupplierNew carsRent = offers[i].Suppliers.FirstOrDefault(f => f.SupplierType == 2);
+                    SupplierNew gm = offers[i].Suppliers.FirstOrDefault(f => f.SupplierType == 1);
+
+                    if (other != null)
+                        AddSuppliers(other.SupplierName);//best
+                    if (best != null)
+                        AddSuppliers(best.SupplierName);//best
+                    if (carsRent != null)
+                        AddSuppliers(carsRent.SupplierName);// carsrent
+
+                    if (i == 0)
+                        chunk.SetAnchor(offers[i].GetSiteName());// if mini add site name
+
+                    cell.AddElement(chunk);
+                    if (gm != null && other != null && other.Price > gm.Price && gm.Price > 0)
+                    {
+                        cell.BackgroundColor = new BaseColor(77, 148, 255);
+                        if (other.Price - gm.Price < 2.5f && other.Price - gm.Price > 0)
+                        {
+                            cell.BackgroundColor = new BaseColor(255, 255, 179);
+                            if (other.Price - gm.Price < 1.5f && other.Price - gm.Price > 0)
+                                cell.BackgroundColor = new BaseColor(128, 255, 128);
+                        }
+                    }
+                    else
+                        cell.BackgroundColor = new BaseColor(255, 102, 102);
+
+                    table.AddCell(cell);
+                }
+                table.CompleteRow();
             }
-            table.CompleteRow();
+            catch (Exception e) {
+                Log.Instance.Warn("-PdfBuilder.AddRow-" + e.InnerException + e.Message);
+            }
         }
 
         public void GetSuppliers()

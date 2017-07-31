@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using IndividualLogins.Models;
 using IndividualLogins.Models.NlogTest.Models;
 using Newtonsoft.Json.Linq;
 using System;
@@ -19,7 +20,7 @@ namespace IndividualLogins.Controllers.App_Code
     {
         public static string ipStr = "lv2.nordvpn.com";//"193.105.240.1";
         public static int port = 80;//8080
-        public static bool addProxy = false;//if true then add
+        public static bool addProxy = true;//if true then add
         public static string user = "edvard.naus@gmail.com";
         public static string pass = "421c3421c3";
 
@@ -105,7 +106,6 @@ namespace IndividualLogins.Controllers.App_Code
             {
                 foreach (HtmlNode mainNode in resultGroups)
                 {
-
                     string price = ParsePrice(mainNode);
                     string supplier = ParseSupplier(mainNode);
                     string category = ParseCategory(mainNode);
@@ -113,7 +113,7 @@ namespace IndividualLogins.Controllers.App_Code
                     string seats = ParseSeats(mainNode);
                     string carName = ParseCarname(mainNode);
 
-                    SupplierNew o = new SupplierNew(supplier, price, category, transm, seats);
+                    SupplierNew o = new SupplierNew(supplier, price, category, transm, seats, carName);
                     if (carName.ToLower().Contains("renault clio estate") && o.Transmission.Equals("A"))
                         o.Category = "Economy";
                     offers.Add(o);
@@ -128,7 +128,7 @@ namespace IndividualLogins.Controllers.App_Code
         public string ParseCarname(HtmlNode mainNode)
         {
             string carName = string.Empty;
-            string[] carNameStrgs = { ".//td[contains(@class,'carResultRow_CarSpec')]" };
+            string[] carNameStrgs = { ".//td[contains(@class,'carResultRow_CarSpec')]/h2" };
             HtmlNode carNameNode = null;
             for (int i = 0; i < carNameStrgs.Count() && carNameNode == null; i++)
             {
@@ -140,7 +140,6 @@ namespace IndividualLogins.Controllers.App_Code
                 Debug.WriteLine("-------------> carName not pursed");
             return null;
         }
-
         public string ParseSeats(HtmlNode mainNode)
         {
             string seats = string.Empty;
@@ -187,7 +186,6 @@ namespace IndividualLogins.Controllers.App_Code
                 Debug.WriteLine("Suppliernot pursed -------------------------------");
             return null;
         }
-
         public string ParseCategory(HtmlNode mainNode)
         {
             //category ------------------------------------------------
@@ -227,8 +225,11 @@ namespace IndividualLogins.Controllers.App_Code
             foreach (SupplierNew o in offers)
             {
                 string offerKey = o.Category + o.Transmission;
-                if (offerKey.Equals("People CarrierM") && !o.Seats.Equals("9") || o.Category.Equals("skip"))
+                if (offerKey.Equals("People CarrierM") && !o.Seats.Equals("9") || o.Category.Contains("skip"))
+                {
+                    AddCar(o);
                     continue;
+                }
 
                 if (dayOffers.ContainsKey(offerKey))
                 {
@@ -238,12 +239,27 @@ namespace IndividualLogins.Controllers.App_Code
                 {
                     dayOffers[offerKey] = new JOffer();
                     dayOffers[offerKey].AddSupplier(o);
-                    Debug.WriteLine(" Not contains" + offerKey);//dayOffers[offerKey].AddSupplier(o); // if not initialized add new offer
                 }
             }
             return dayOffers;
         }
 
+        public void AddCar(SupplierNew s)
+        {
+            using(RatesDBContext ctx = new RatesDBContext())
+            {
+                ctx.Cars.Add(new Cars {
+                    CarName = s.CarName,
+                    Category = s.Category,
+                    Seats = s.Seats,
+                    Transmission = s.Transmission,
+                    SupplierName = s.SupplierName,
+                    SupplierType = s.SupplierType,
+                    IsAssigned = true
+                });
+                ctx.SaveChanges();
+            }
+        }
         public List<SupplierNew> GetNorwRates(string url)
         {
             string responseFromServer = GetSource(url);

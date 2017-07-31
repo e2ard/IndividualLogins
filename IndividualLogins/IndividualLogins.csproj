@@ -190,7 +190,6 @@
     <Compile Include="Controllers\App_Code\Const.cs" />
     <Compile Include="Controllers\App_Code\EcoBookings.cs" />
     <Compile Include="Controllers\App_Code\Expedia.cs" />
-    <Compile Include="Controllers\App_Code\FullOffer.cs" />
     <Compile Include="Controllers\App_Code\JOffer.cs" />
     <Compile Include="Controllers\App_Code\JSourceReader.cs" />
     <Compile Include="Controllers\App_Code\PdfBuilder.cs" />
@@ -200,6 +199,7 @@
     <Compile Include="Controllers\App_Code\SiteBase.cs" />
     <Compile Include="Controllers\App_Code\Trawler.cs" />
     <Compile Include="Controllers\App_Code\Vehicle.cs" />
+    <Compile Include="Controllers\CarsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PricingController.cs" />
@@ -240,7 +240,7 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Properties\PublishProfiles\1.pubxml" />
+    <None Include="Properties\PublishProfiles\Production.pubxml" />
     <None Include="Properties\PublishProfiles\TestEnvironment.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -296,6 +296,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Pricing\Index.cshtml" />
     <Content Include="Views\Home\News.cshtml" />
+    <Content Include="Views\Cars\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="excel\" />

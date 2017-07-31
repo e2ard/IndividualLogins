@@ -90,12 +90,11 @@ namespace IndividualLogins.Models
 
         public string Excecute()
         {
-            Dictionary<string, Dictionary<string, JOffer>> pdfRates = null;
             string brokerName = GetBrokerName(Sf.Source);
             SiteBase site = null;
 
             Rates rates = new Rates();
-            pdfRates = rates.GetRates(Sf, out site);
+            Dictionary<string, Dictionary<string, JOffer>> pdfRates = rates.GetRates(Sf, out site);
 
             if (pdfRates.Values.FirstOrDefault().Count > 0)
             {
@@ -126,9 +125,9 @@ namespace IndividualLogins.Models
 
                     Thread.Sleep(800);
 
-                    string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
-                    if (responseText.Length < 50)
-                        throw new Exception("Something went wrong");
+                    //string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
+                    //if (responseText.Length < 50)
+                    //    throw new Exception("Something went wrong");
 
                     Thread.Sleep(800);
                 }

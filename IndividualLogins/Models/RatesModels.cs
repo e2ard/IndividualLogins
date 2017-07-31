@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Web;
 
 namespace IndividualLogins.Models
 {
@@ -21,6 +18,10 @@ namespace IndividualLogins.Models
         public DbSet<Location> Locations { get; set; }
 
         public DbSet<News> News { get; set; }
+
+        public DbSet<Cars> Cars { get; set; }
+
+        public DbSet<PricingInterval> Classes { get; set; }
     }
 
     public class Update
@@ -49,7 +50,39 @@ namespace IndividualLogins.Models
     {
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Text { get; set; }
+
+        public DateTime UpdateDate { get; set; }
         public bool IsAvailable { get; set; }
+    }
+
+    public class Cars
+    {
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+        public string SupplierName { get; set; }
+        public float Price { get; set; }
+        public string Transmission { get; set; }
+        public float Seats { get; set; }
+        public string CarName { get; set; }
+        public string Category { get; set; }
+        public int SupplierType { get; set; }
+
+        public bool IsAssigned { get; set; }
+    }
+
+    public class PricingInterval
+    {
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+        public string ClassName { get; set; }
+        public string ClassLinkId { get; set; }
+
+        public int LocationId { get; set; }
+
+        public int IntervalNum { get; set; }
+
+        public string CategoryName { get; set; }
+        
     }
 }
