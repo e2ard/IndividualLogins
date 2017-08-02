@@ -28,7 +28,6 @@ namespace IndividualLogins.Controllers.App_Code
         public Dictionary<string, Dictionary<string, JOffer>> GetRates(SearchFilters searchFilters, out SiteBase tempSite)
         {
             Log.Instance.Warn("---Begin: GetRates");
-            SiteBase site = null;
             switch (searchFilters.Source)
             {
                 case 1:
@@ -68,9 +67,10 @@ namespace IndividualLogins.Controllers.App_Code
                         myWorksheet.Row(rowNum + 1).Height = 50;
                         myWorksheet.Row(rowNum + 2).Height = 50;
 
-                        SupplierNew other = offers.ElementAt(i).Suppliers.FirstOrDefault(f => f.SupplierType == 4);
-                        SupplierNew gm = offers.ElementAt(i).Suppliers.FirstOrDefault(f => f.SupplierType == 1);
-                        SupplierNew cr = offers.ElementAt(i).Suppliers.FirstOrDefault(f => f.SupplierType == 2);
+                        JOffer o = offers.ElementAt(i);
+                        SupplierNew other = o.GetOtherSupplier();
+                        SupplierNew gm = o.GetGmSupplier();
+                        SupplierNew cr = o.GetCrSupplier();
 
                         myWorksheet.Cells[rowNum, i + 2].Value = (gm != null ? gm.ToString() : "");
                         myWorksheet.Cells[rowNum + 1, i + 2].Value = (cr != null ? cr.ToString() : "");

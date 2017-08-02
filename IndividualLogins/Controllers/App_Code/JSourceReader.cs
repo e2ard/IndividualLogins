@@ -26,39 +26,6 @@ namespace IndividualLogins.Controllers.App_Code
 
         public JSourceReader() { }
 
-        public JOffer GetMinOffer(List<JOffer> offers)
-        {
-            float minPrice = 999999;
-            String minSupplier = null;
-            float minGMPrice = 9999999;
-            String minGMSupplier = null;
-            foreach (JOffer of in offers)
-            {
-                String supplier = of.GetSupplier().ToLower();
-                if (!(supplier.Equals("green motion"))
-                     && (of.GetPrice() < minPrice))
-                {
-
-                    minPrice = of.GetPrice();
-                    minSupplier = of.GetSupplier();
-                }
-                else if (supplier.Equals("green motion")
-                    && (of.GetPrice() < minGMPrice))
-                {
-                    minGMPrice = of.GetPrice();
-                    minGMSupplier = "GM";
-                }
-
-            }
-            JOffer offer = new JOffer();
-            offer.SetPrice(minPrice);
-            offer.SetSupplier(minSupplier);
-            offer.SetGMPrice(minGMPrice);
-            offer.SetGM(minGMSupplier);
-            offer.SetSiteName(offer.GetSiteName());
-            return offer;
-        }
-
         public string GetSource(string url)
         {
             try
@@ -227,7 +194,7 @@ namespace IndividualLogins.Controllers.App_Code
                 string offerKey = o.Category + o.Transmission;
                 if (offerKey.Equals("People CarrierM") && !o.Seats.Equals("9") || o.Category.Contains("skip"))
                 {
-                    AddCar(o);
+                    //AddCar(o);
                     continue;
                 }
 

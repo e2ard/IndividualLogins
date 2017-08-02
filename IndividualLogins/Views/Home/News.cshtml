@@ -10,7 +10,7 @@
 @foreach (var item in Model)
 {
     <div>
-        <u>25-07-2017</u> - @item.Text
+        <u>@item.UpdateDate.ToShortDateString()</u> - @item.Text
     </div>
 }
 

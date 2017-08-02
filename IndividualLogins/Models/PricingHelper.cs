@@ -25,7 +25,9 @@ namespace IndividualLogins.Models
             Classes = classes;
             SetBrokerDiscounts();
         }
-
+        public PricingHelper()
+        {
+        }
         private string GetBrokerName(int? source)
         {
             switch (source)
@@ -41,13 +43,12 @@ namespace IndividualLogins.Models
         }
         public string SetDates()
         {
-            Dictionary<string, Dictionary<string, JOffer>> pdfRates = null;
             string brokerName = GetBrokerName(Sf.Location);
             SiteBase site = null;
 
             Rates rates = new Rates();
 
-            pdfRates = rates.GetRates(Sf, out site);
+            Dictionary<string, Dictionary<string, JOffer>> pdfRates = rates.GetRates(Sf, out site);
             
             for (int i = 0; i < Classes.Count(); i++)
             {
@@ -125,9 +126,9 @@ namespace IndividualLogins.Models
 
                     Thread.Sleep(800);
 
-                    //string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
-                    //if (responseText.Length < 50)
-                    //    throw new Exception("Something went wrong");
+                    string responseText = Request_gmlithuania_fusemetrix_com(Classes[i].ClassLinkId, body);
+                    if (responseText.Length < 50)
+                        throw new Exception("Something went wrong");
 
                     Thread.Sleep(800);
                 }
@@ -142,7 +143,7 @@ namespace IndividualLogins.Models
 
             List<float> priceList = new List<float>();
             float lastAddedPrice = 0;
-            float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
+            float avg = GetAverage(categoryOffers.Select(s => s.GetMinPrice()).ToList());
 
             try
             {
@@ -150,13 +151,13 @@ namespace IndividualLogins.Models
                 {
                     if (i < categoryOffers.Count())
                     {
-                        float gmPrice = categoryOffers.ElementAt(i).gmPrice;
-                        float price = categoryOffers.ElementAt(i).price ;
+                        float gmPrice = categoryOffers.ElementAt(i).GetMinGmPrice();
+                        float price = categoryOffers.ElementAt(i).GetMinPrice() ;
 
-                        price = price > 0 
-                            ? price 
+                        price = price > 0
+                            ? price
                             : higherOffers.Count() > i
-                                ? higherOffers.ElementAt(i).price
+                                ? higherOffers.ElementAt(i).GetMinPrice()
                                 : 0;
 
                         float fusePrice = fuseRates.ElementAt(i);
@@ -165,13 +166,13 @@ namespace IndividualLogins.Models
                         if (brokerName.Equals("JIG"))
                         {
                             lastAddedPrice = CalculatePriceJIG(gmPrice, price, fusePrice);
-                            lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f? lastAddedPrice : avg * dayIndex;
+                            lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f? lastAddedPrice : avg * dayIndex * 0.7f;
                             priceList.Add(lastAddedPrice);
                         }
                         else
                         {
                             lastAddedPrice = CalculatePriceCTR(gmPrice, price, fusePrice);
-                            lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f? lastAddedPrice : avg * dayIndex;
+                            lastAddedPrice = lastAddedPrice > avg * dayIndex * 0.7f? lastAddedPrice : avg * dayIndex * 0.7f;
                             priceList.Add(lastAddedPrice);
                         }
                     }
@@ -212,8 +213,13 @@ namespace IndividualLogins.Models
                     break;
             }
 
+            List<float> categoryOffersPrices = null;
 
-            float avg = GetAverage(categoryOffers.Select(s => s.price).ToList());
+            foreach(JOffer o in categoryOffers){
+                categoryOffersPrices.Add(o.GetMinPrice());
+            }
+
+            float avg = GetAverage(categoryOffersPrices);
             float lastAddedPrice = 0;
 
             int dayIndex = 0;
@@ -222,11 +228,11 @@ namespace IndividualLogins.Models
                 
                 if (i < categoryOffers.Count()){
                     dayIndex = i + 1;
-                float price = categoryOffers.ElementAt(i).price;
+                float price = categoryOffers.ElementAt(i).Suppliers.Min(a => a.Price);
                 price = price > 0
                     ? price
                     : higherOffers.Count() > i
-                        ? higherOffers.ElementAt(i).price
+                        ? higherOffers.ElementAt(i).Suppliers.Min(a => a.Price)
                         : 0;
 
                     if (brokerName.Equals("JIG"))
@@ -401,7 +407,7 @@ namespace IndividualLogins.Models
         {
             float overridePrice = price;
             float priceDiff = gmPrice - price;
-            float amountCoef = price > 95 ? 0.8f : 1;
+            float amountCoef = price > 95 || priceDiff < 2 ? 0.8f : 1;
 
 
             if (priceDiff >= 0)

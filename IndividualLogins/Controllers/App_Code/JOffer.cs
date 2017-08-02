@@ -98,6 +98,40 @@ public class JOffer
         Suppliers = new List<SupplierNew>();
     }
 
+    public float GetMinPrice()
+    {
+        SupplierNew s = Suppliers.OrderBy(t => t.Price).FirstOrDefault(s1 => s1.SupplierType == 4 && s1.Price > 0);
+        return s != null? s.Price: 0;
+    }
+
+    private SupplierNew GetByTypeSupplier(int type)
+    {
+        return Suppliers.OrderBy(p => p.Price).FirstOrDefault(s => s.SupplierType == type);
+    }
+
+    public SupplierNew GetBestSupplier()
+    {
+        return GetByTypeSupplier(3);
+    }
+    public SupplierNew GetOtherSupplier()
+    {
+        return GetByTypeSupplier(4);
+    }
+
+    public SupplierNew GetGmSupplier()
+    {
+        return GetByTypeSupplier(1);
+    }
+
+    public SupplierNew GetCrSupplier()
+    {
+        return GetByTypeSupplier(2);
+    }
+    public float GetMinGmPrice()
+    {
+        SupplierNew s = Suppliers.OrderBy(t => t.Price).FirstOrDefault(s1 => s1.SupplierType == 1 && s1.Price > 0);
+        return s != null ? s.Price : 0;
+    }
     public void AddSupplier(SupplierNew sp)
     {
         Suppliers.Add(sp);
@@ -106,6 +140,7 @@ public class JOffer
     {
         bestSupplier = "Best";
     }
+
 
     public void SetSupplier(string splr)
     {
@@ -127,11 +162,6 @@ public class JOffer
         siteName = site;
     }
 
-    public string GetSupplier()
-    {
-        return this.supplier;
-    }
-
     public void SetPrice(string price)
     {
         this.price = ParsePrice(price);
@@ -142,19 +172,9 @@ public class JOffer
         this.price = price;
     }
 
-    public float GetPrice()
-    {
-        return this.price;
-    }
-
     public void SetGM(string splr)
     {
         this.gmSupplier = splr;
-    }
-
-    public string GetGM()
-    {
-        return this.gmSupplier;
     }
 
     public void SetGMPrice(string price)
@@ -165,16 +185,6 @@ public class JOffer
     public void SetGMPrice(float price)
     {
         this.gmPrice = price;
-    }
-
-    public float GetGMPrice()
-    {
-        return this.gmPrice;
-    }
-
-    public string GetBest()
-    {
-        return this.bestSupplier;
     }
 
     public void SetBestPrice(string price)
@@ -256,10 +266,11 @@ public class JOffer
         {
             string output = string.Empty;
 
-            SupplierNew gm = Suppliers.FirstOrDefault(s => s.SupplierType == 1);
-            SupplierNew cr = Suppliers.FirstOrDefault(s => s.SupplierType == 2);
-            SupplierNew best = Suppliers.FirstOrDefault(s => s.SupplierType == 3);
-            SupplierNew other = Suppliers.FirstOrDefault(s => s.SupplierType == 4);
+            SupplierNew other = Suppliers.OrderBy(s => s.Price).FirstOrDefault(f => f.SupplierType == 4);
+            SupplierNew best = Suppliers.OrderBy(s => s.Price).FirstOrDefault(f => f.SupplierType == 3);
+            SupplierNew cr = Suppliers.OrderBy(s => s.Price).FirstOrDefault(f => f.SupplierType == 2);
+            SupplierNew gm = Suppliers.OrderBy(s => s.Price).FirstOrDefault(f => f.SupplierType == 1);
+
             List<SupplierNew> suppliersNew = new List<SupplierNew>();//Suppliers.GroupBy(g => g.SupplierType, (key, s) => s.OrderBy(e => e.Price).First()).ToList();
 
             //if (Suppliers.Count(s => s.SupplierType == 4) > 1)

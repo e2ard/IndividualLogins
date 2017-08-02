@@ -16,8 +16,7 @@ namespace UTest
         
         static void Main(string[] args)
         {
-
-            //new UTest().CalculatePricesTest();
+            new UTest().CalculatePricesTest();
             new UTest().CalculateTime();
 
         }
@@ -25,6 +24,9 @@ namespace UTest
 
     class UTest
     {
+        static string siteString = "https://otageo.cartrawler.com/cartrawlerota/json?callback=angular.callbacks._3&msg={%22@Target%22:%22Production%22,%22@PrimaryLangID%22:%22en%22,%22POS%22:{%22Source%22:[{%22@ERSP_UserID%22:%22MP%22,%22@ISOCurrency%22:%22EUR%22,%22RequestorID%22:{%22@Type%22:%2216%22,%22@ID%22:%22643826%22,%22@ID_Context%22:%22CARTRAWLER%22}},{%22RequestorID%22:{%22@Type%22:%2216%22,%22@ID%22:%220410201033167920303%22,%22@ID_Context%22:%22CUSTOMERID%22}},{%22RequestorID%22:{%22@Type%22:%2216%22,%22@ID%22:%220410201033167920303%22,%22@ID_Context%22:%22ENGINELOADID%22}},{%22RequestorID%22:{%22@Type%22:%2216%22,%22@ID%22:%22643826%22,%22@ID_Context%22:%22PRIORID%22}},{%22RequestorID%22:{%22@Type%22:%2216%22,%22@ID%22:%223%22,%22@ID_Context%22:%22BROWSERTYPE%22}}]},%22@xmlns%22:%22http:%2F%2Fwww.opentravel.org%2FOTA%2F2003%2F05%22,%22@xmlns:xsi%22:%22http:%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance%22,%22@Version%22:%221.005%22,%22VehAvailRQCore%22:{%22@Status%22:%22Available%22,%22VehRentalCore%22:{%22@PickUpDateTime%22:%222017-12-23T20:00:00%22,%22@ReturnDateTime%22:%222017-12-29T20:00:00%22,%22PickUpLocation%22:{%22@CodeContext%22:%22CARTRAWLER%22,%22@LocationCode%22:%223224%22},%22ReturnLocation%22:{%22@CodeContext%22:%22CARTRAWLER%22,%22@LocationCode%22:%223224%22}},%22VehPrefs%22:{%22VehPref%22:{%22VehClass%22:{%22@Size%22:%220%22}}},%22DriverType%22:{%22@Age%22:30}},%22VehAvailRQInfo%22:{%22Customer%22:{%22Primary%22:{%22CitizenCountryName%22:{%22@Code%22:%22LT%22}}},%22TPA_Extensions%22:{%22showBaseCost%22:true,%22ConsumerIP%22:%2278.56.135.139%22,%22GeoRadius%22:5,%22Window%22:{%22@name%22:%22Ryanair%2520-%2520Car%2520Hire%22,%22@engine%22:%22CTABE-V5.1%22,%22@svn%22:%225.1.11-3%22,%22@region%22:%22en%22,%22@patVal%22:0,%22UserAgent%22:%22Mozilla%2F5.0+%28Windows+NT+6.3;+WOW64;+rv:45.0%29+Gecko%2F20100101+Firefox%2F45.0%22,%22BrowserName%22:%22firefox%22,%22BrowserVersion%22:%2245%22,%22URL%22:%22https:%2F%2Fcar-hire.ryanair.com%2Fen-gb%2Fbook%3FclientId%3D643826%26currency%3DGBP%26age%3D30%26pickupName%3DVilnius%2520Airport%26returnName%3DVilnius%2520Airport%26countryID%3DLT%26residencyId%3DLT%26pickupDate%3D10%26pickupMonth%3D03%26pickupYear%3D2016%26pickupHour%3D10%26pickupMinute%3D0%26returnDate%3D10%26returnMonth%3D04%26returnYear%3D2016%26returnHour%3D10%26returnMinute%3D0%26pickupID%3D3224%26returnID%3D3224%22},%22RefID%22:{}}}}&type=OTA_VehAvailRateRQ";
+        SiteBase site = new Trawler(siteString);
+        SearchFilters sf = new SearchFilters { PuDate = new DateTime(2017, 11, 01), DoDate = new DateTime(2017, 11, 13), Location = 1, Source = 2};
         public void CalculateTime()
         {
             DateTime now = DateTime.Now;
@@ -35,12 +37,16 @@ namespace UTest
         }
         public void CalculatePricesTest()
         {
+            Dictionary<string, Dictionary<string, JOffer>> pdfRates = new Rates().GetRates(sf, out site);
             string brokerName = "JIG";
             //  for (int i = 0; i < Classes.Count(); i++)
             {
-                List<JOffer> categoryOffers = GetTestOffers();
-                List<JOffer> higherOffers = GeHigherOffers();
-                List<float> fuseRates = GetFuseRatesTest();
+                PricingHelper ph = new PricingHelper();
+
+                List<JOffer> categoryOffers = new PricingHelper().GetMiniRatesList(pdfRates, "EconomyA");
+                List<JOffer> higherOffers = new PricingHelper().GetMiniRatesList(pdfRates, "CompactM");
+                List<float> fuseRates = new CsvHelper("314141").GetFuseRates(brokerName);
+
                 PricingClass[] classes = new PricingClass[5];
                 PricingHelper hp = new PricingHelper(new PricingModel(), classes);
                 List<float> priceList = hp.CalculatePrices(categoryOffers, higherOffers, fuseRates, brokerName);
@@ -50,8 +56,8 @@ namespace UTest
                 for (int i = 0; i < priceList.Count; i++)
                 {
                     JOffer tempOffer = categoryOffers.Count > i ? categoryOffers.ElementAt(i): null;
-                    float price = tempOffer != null ? tempOffer.price : 0;
-                    float gmPrice = tempOffer != null ? tempOffer.gmPrice : 0;
+                    float price = tempOffer != null ? tempOffer.GetMinPrice() : 0;
+                    float gmPrice = tempOffer != null ? tempOffer.GetMinGmPrice() : 0;
 
                     Console.WriteLine(i + " price " + price + " gmprice " + gmPrice + " fuse: " + fuseRates.ElementAt(i) + " new price: " + priceList.ElementAt(i));
                 }
@@ -167,6 +173,14 @@ namespace UTest
             o1 = new JOffer();
             o1.SetGM("Green");
             o1.SetGMPrice(180f);
+
+            o1 = new JOffer();
+            o1.SetGM("");
+            o1.SetGMPrice(0);
+
+            o1 = new JOffer();
+            o1.SetGM("");
+            o1.SetGMPrice(0);
 
             offers.Add(o1);
             offers.Add(o1);
