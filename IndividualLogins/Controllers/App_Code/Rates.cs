@@ -8,6 +8,8 @@ using IndividualLogins.Models.NlogTest.Models;
 using System.IO;
 using OfficeOpenXml;
 using static JOffer;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace IndividualLogins.Controllers.App_Code
 {
@@ -37,7 +39,7 @@ namespace IndividualLogins.Controllers.App_Code
                 case 3:
                     return GetScannerRates(searchFilters, out tempSite);
             }
-            Log.Instance.Warn("---Begin: GetRates");
+            Log.Instance.Warn("---End: GetRates");
             tempSite = null;
             return null;
         }
@@ -120,7 +122,7 @@ namespace IndividualLogins.Controllers.App_Code
 
         public Dictionary<string, Dictionary<string, JOffer>> GetRentalRates(SearchFilters searchFilters, out SiteBase site)
         {
-            Log.Instance.Warn("---Begin: GetRates");
+            Log.Instance.Warn("---Begin: GetRentalRates");
             DateTime sDate = searchFilters.PuDate;
             DateTime eDate = searchFilters.DoDate;
 
@@ -138,47 +140,53 @@ namespace IndividualLogins.Controllers.App_Code
             for (int i = 0; i < links.Count; i++)
                 offerMap.Add(links[i], new Dictionary<string, JOffer>());
 
-            List<Thread> threads = new List<Thread>();
-            //--- Start all threads
-            for (int index = 0; index < links.Count; index++)
+            Func<object, int> action = (object obj) =>
             {
-                Thread thread = new Thread(() =>
-                {
-                    JSourceReader reader = new JSourceReader();
-                    offerMap[Thread.CurrentThread.Name == null ? links.ElementAt(0) : Thread.CurrentThread.Name] =
-                    reader.GetMap(reader.ExtractOffers(reader.GetResultGroup(Thread.CurrentThread.Name)));
-                });
-                thread.Name = links.ElementAt(index);
-                threads.Add(thread);
-                thread.Start();
-            }
-
-            //check if thread has done
-            Boolean allCompleted = false;
-            while (!allCompleted)
-            {
-                int completed = links.Count;
-                for (int i = 0; i < links.Count; i++)
-                {
-                    if (!threads.ElementAt(i).IsAlive)
-                        --completed;
-                    else
-                    {
-                        Thread.Sleep(300);
-                        break;
-                    }
-                }
-                if (completed == 0)
-                    break;
-            }
+                int i = (int)obj;
+                JSourceReader reader = new JSourceReader();
+                offerMap[links.ElementAt(i)] = reader.GetMap(reader.ExtractOffers(reader.GetResultGroup(links.ElementAt(i))));
+                return 0;
+            };
+            RunThreads(action, links.Count);
+            Log.Instance.Warn("---END: GetRentalRates");
             return offerMap;
         }
 
         public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRates(SearchFilters searchFilters, out SiteBase site)
         {
+            DateTime stime = DateTime.Now;
             Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarTrawler);
-            DateTime sDate = searchFilters.PuDate.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
-            DateTime eDate = searchFilters.DoDate.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
+            DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
+            DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
+            s.InitDate(sDate);
+
+            int numOfIterations = (eDate - sDate).Days;
+            List<string> links = s.GetGeneratedLinksByDate(sDate, eDate);
+            site = s;
+
+            Dictionary<string, Dictionary<string, JOffer>> offerMap = new Dictionary<string, Dictionary<string, JOffer>>();
+
+            for (int i = 0; i < links.Count; i++)
+                offerMap.Add(links[i], new Dictionary<string, JOffer>());
+
+            Func<object, int> action = (object obj) =>
+            {
+                int i = (int)obj;
+                JSourceReader reader = new JSourceReader();
+                offerMap[links.ElementAt(i)] = reader.GetMap(reader.GetNorwRates(links.ElementAt(i)));
+                return 0;
+            };
+
+            RunThreads(action, links.Count);
+            Debug.WriteLine("Time elapsed" + (DateTime.Now - stime).Seconds);
+            return offerMap;
+        }
+
+        public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRatesSingle(SearchFilters searchFilters, out SiteBase site)
+        {
+            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarTrawler);
+            DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
+            DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
             s.InitDate(sDate);
 
             int numOfIterations = (eDate - sDate).Days;
@@ -198,36 +206,9 @@ namespace IndividualLogins.Controllers.App_Code
             //--- Start all threads
             for (int index = 0; index < links.Count; index++)
             {
-                Thread thread = new Thread(() =>
-                {
-                    JSourceReader reader = new JSourceReader();
-                    offerMap[Thread.CurrentThread.Name == null ?
-                        links.ElementAt(0) :
-                        Thread.CurrentThread.Name] =
-                            reader.GetMap(reader.GetNorwRates(Thread.CurrentThread.Name));
-                });
-                thread.Name = links.ElementAt(index);
-                threads.Add(thread);
-                thread.Start();
-            }
-
-            //check if threads has done
-            Boolean allCompleted = false;
-            while (!allCompleted)
-            {
-                int completed = links.Count;
-                for (int i = 0; i < links.Count; i++)
-                {
-                    if (!threads.ElementAt(i).IsAlive)
-                        --completed;
-                    else
-                    {
-                        Thread.Sleep(100);
-                        break;
-                    }
-                }
-                if (completed == 0)
-                    break;
+                JSourceReader reader = new JSourceReader();
+                offerMap[links.ElementAt(index)] =
+                        reader.GetMap(reader.GetNorwRates(links.ElementAt(index)));
             }
 
             return offerMap;
@@ -251,44 +232,34 @@ namespace IndividualLogins.Controllers.App_Code
                 offerMap.Add(links[i], new Dictionary<string, JOffer>());
 
 
-            List<Thread> threads = new List<Thread>();
-            //--- Start all threads
-            for (int index = 0; index < links.Count; index++)
+            Func<object, int> action = (object obj) =>
             {
-                Thread thread = new Thread(() =>
-                {
-                    JSourceReader reader = new JSourceReader();
-                    offerMap[Thread.CurrentThread.Name == null ?
-                        links.ElementAt(0) :
-                        Thread.CurrentThread.Name] =
-                            reader.GetMap(reader.GetScannerRates(Thread.CurrentThread.Name));
-                });
-                thread.Name = links.ElementAt(index);
-                threads.Add(thread);
-                thread.Start();
-            }
-
-            //check if threads has done
-            Boolean allCompleted = false;
-            while (!allCompleted)
-            {
-                int completed = links.Count;
-                for (int i = 0; i < links.Count; i++)
-                {
-                    if (!threads.ElementAt(i).IsAlive)
-                        --completed;
-                    else
-                    {
-                        Thread.Sleep(100);
-                        break;
-                    }
-                }
-                if (completed == 0)
-                    break;
-            }
+                int i = (int)obj;
+                JSourceReader reader = new JSourceReader();
+                offerMap[links.ElementAt(i)] = reader.GetMap(reader.GetNorwRates(links.ElementAt(i)));
+                return 0;
+            };
+            RunThreads(action, links.Count);
             s.SetTitle("scanner");
             site = s;
             return offerMap;
+        }
+
+        public void RunThreads(Func<object, int> action, int linkCount)
+        {
+            var tasks = new List<Task<int>>();
+            for (int index = 0; index < linkCount; index++)
+            {
+                tasks.Add(Task<int>.Factory.StartNew(action, index));
+            }
+
+            try
+            {
+                Task.WaitAll(tasks.ToArray());
+            }
+            catch (AggregateException e)
+            {
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ namespace IndividualLogins.Controllers
         {
             using (RatesDBContext ctx = new RatesDBContext())
             {
-                return View(ctx.Cars.Where(c => c.IsAssigned).ToList());
+                return View(ctx.Cars.Where(c => c.IsAssigned).OrderBy(o => o.Category).ToList());
             }
         }
     }

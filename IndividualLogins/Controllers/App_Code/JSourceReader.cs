@@ -23,9 +23,8 @@ namespace IndividualLogins.Controllers.App_Code
         public static bool addProxy = true;//if true then add
         public static string user = "edvard.naus@gmail.com";
         public static string pass = "421c3421c3";
-
+        private List<Cars> cars = new List<Cars>();
         public JSourceReader() { }
-
         public string GetSource(string url)
         {
             try
@@ -51,7 +50,6 @@ namespace IndividualLogins.Controllers.App_Code
                 return null;
             }
         }
-
         public HtmlNodeCollection GetResultGroup(string site)
         {
             HtmlDocument doc = new HtmlDocument();
@@ -65,7 +63,6 @@ namespace IndividualLogins.Controllers.App_Code
             }
             return offersFound;
         }
-
         public List<SupplierNew> ExtractOffers(HtmlNodeCollection resultGroups)
         {
             List<SupplierNew> offers = new List<SupplierNew>();
@@ -91,7 +88,6 @@ namespace IndividualLogins.Controllers.App_Code
 
             return offers;
         }
-
         public string ParseCarname(HtmlNode mainNode)
         {
             string carName = string.Empty;
@@ -194,7 +190,7 @@ namespace IndividualLogins.Controllers.App_Code
                 string offerKey = o.Category + o.Transmission;
                 if (offerKey.Equals("People CarrierM") && !o.Seats.Equals("9") || o.Category.Contains("skip"))
                 {
-                    //AddCar(o);
+                    AddCar(o);
                     continue;
                 }
 
@@ -210,21 +206,25 @@ namespace IndividualLogins.Controllers.App_Code
             }
             return dayOffers;
         }
-
         public void AddCar(SupplierNew s)
         {
             using(RatesDBContext ctx = new RatesDBContext())
             {
-                ctx.Cars.Add(new Cars {
-                    CarName = s.CarName,
-                    Category = s.Category,
-                    Seats = s.Seats,
-                    Transmission = s.Transmission,
-                    SupplierName = s.SupplierName,
-                    SupplierType = s.SupplierType,
-                    IsAssigned = true
-                });
-                ctx.SaveChanges();
+                Cars c = ctx.Cars.FirstOrDefault(o => o.CarName.Contains(s.CarName));
+                if (c == null)
+                {
+                    ctx.Cars.Add(new Cars
+                    {
+                        CarName = s.CarName,
+                        Category = s.Category.Contains("skip") ? s.Category.Substring(4) : s.Category,
+                        Seats = s.Seats,
+                        Transmission = s.Transmission,
+                        SupplierName = s.SupplierName,
+                        SupplierType = s.SupplierType,
+                        IsAssigned = true
+                    });
+                    ctx.SaveChanges();
+                }
             }
         }
         public List<SupplierNew> GetNorwRates(string url)
@@ -247,8 +247,14 @@ namespace IndividualLogins.Controllers.App_Code
                 {
                     string category = vehicle["VehAvailCore"]["Vehicle"]["@Code"].ToString();// category
                     string price = vehicle["VehAvailCore"]["TotalCharge"]["@RateTotalAmount"].ToString();//price
+                    string transm = vehicle["VehAvailCore"]["Vehicle"]["@TransmissionType"].ToString().Substring(0,1);//transm
+                    string carName = vehicle["VehAvailCore"]["Vehicle"]["VehMakeModel"]["@Name"].ToString();// carname
+                    float seats = int.Parse(vehicle["VehAvailCore"]["Vehicle"]["@PassengerQuantity"].ToString());//seats
                     SupplierNew offer = new SupplierNew(supplier, price);
+                    offer.CarName = carName;
                     offer.SetCategory(category);
+                    //offer.Transmission = transm;
+                    offer.Seats = seats;
                     offers.Add(offer);
                 }
             }

@@ -149,10 +149,12 @@ namespace IndividualLogins.Controllers
         //
         // GET: /Account/Register
         [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         public ActionResult Register()
         {
             ViewBag.Name = new SelectList(context.Roles.Where(u => !u.Name.Contains("Admin"))
                                             .ToList(), "Name", "Name");
+            ViewBag.Users = context.Users.Select(s => new UserDetails { Id = s.Id, UserName = s.UserName, Role = context.Roles.FirstOrDefault(o => o.Id == s.Roles.FirstOrDefault().RoleId).Name }).ToList();
             return View();
         }
 
@@ -183,6 +185,8 @@ namespace IndividualLogins.Controllers
                 }
                 ViewBag.Name = new SelectList(context.Roles.Where(u => !u.Name.Contains("Admin"))
                                           .ToList(), "Name", "Name");
+                ViewBag.Users = context.Users.Select(s => new UserDetails { Id = s.Id, UserName = s.UserName, Role = context.Roles.FirstOrDefault(o => o.Id == s.Roles.FirstOrDefault().RoleId).Name }).ToList();
+
                 AddErrors(result);
             }
 

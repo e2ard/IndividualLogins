@@ -83,4 +83,12 @@ namespace IndividualLogins.Models
         public string SelectedProvider { get; set; }
         public ICollection<System.Web.Mvc.SelectListItem> Providers { get; set; }
     }
+
+    public class UserDetails
+    {
+        public string UserName { get; set; }
+        public string Role { get; set; }
+
+        public string Id { get; set; }
+    }
 }

@@ -273,19 +273,19 @@ public class JOffer
 
             List<SupplierNew> suppliersNew = new List<SupplierNew>();//Suppliers.GroupBy(g => g.SupplierType, (key, s) => s.OrderBy(e => e.Price).First()).ToList();
 
-            //if (Suppliers.Count(s => s.SupplierType == 4) > 1)
-            //    suppliersNew.AddRange(Suppliers.Where(s => s.SupplierType == 4).OrderBy(p => p.Price).Take(2).ToList());
-            //else if(Suppliers.FirstOrDefault(s => s.SupplierType == 4) != null)
-                
+            if (Suppliers.Count(s => s.SupplierType == 4) > 1)
+                suppliersNew.AddRange(Suppliers.Where(s => s.SupplierType == 4).OrderBy(p => p.Price).Take(2).ToList());
+            else if (Suppliers.FirstOrDefault(s => s.SupplierType == 4) != null)
+                suppliersNew.Add(other);
 
-            if(gm != null)
+            if (gm != null)
                 suppliersNew.Add(gm);
             if (cr != null)
                 suppliersNew.Add(cr);
             if (best != null)
                 suppliersNew.Add(best);
-            if (other != null)
-                suppliersNew.Add(other);
+            //if (other != null)
+            //    suppliersNew.Add(other);
 
             foreach (SupplierNew sup in suppliersNew.OrderBy(t => t.Price))
             {
