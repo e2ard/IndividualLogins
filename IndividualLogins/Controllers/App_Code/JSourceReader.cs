@@ -4,6 +4,7 @@ using IndividualLogins.Models.NlogTest.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web.Configuration;
 using static JOffer;
 
 namespace IndividualLogins.Controllers.App_Code
@@ -18,13 +20,20 @@ namespace IndividualLogins.Controllers.App_Code
 
     public class JSourceReader
     {
-        public static string ipStr = "lv2.nordvpn.com";//"193.105.240.1";
-        public static int port = 80;//8080
-        public static bool addProxy = true;//if true then add
-        public static string user = "edvard.naus@gmail.com";
-        public static string pass = "421c3421c3";
-        private List<Cars> cars = new List<Cars>();
-        public JSourceReader() { }
+        public string ipStr;// = "lv2.nordvpn.com";//"193.105.240.1";
+        public int port;// = 80;//8080
+        public bool addProxy;// = true;//if true then add
+        public string user;// = "edvard.naus@gmail.com";
+        public string pass;// = "421c3421c3";
+        
+        public JSourceReader() {
+            Configuration config = WebConfigurationManager.OpenWebConfiguration("/");
+            ipStr = config.AppSettings.Settings["ipStr"].Value;
+            port = int.Parse(config.AppSettings.Settings["port"].Value);
+            addProxy = bool.Parse(config.AppSettings.Settings["addProxy"].Value);
+            user = config.AppSettings.Settings["user"].Value;
+            pass = config.AppSettings.Settings["pass"].Value;
+        }
         public string GetSource(string url)
         {
             try

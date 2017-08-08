@@ -242,6 +242,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Content\ExcelPackageTemplate.xlsx" />
+    <Content Include="app.config" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
