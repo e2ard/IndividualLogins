@@ -47,7 +47,7 @@ namespace IndividualLogins.Controllers.App_Code
         public string GetExcel(SiteBase s, Dictionary<string, Dictionary<string, JOffer>> offerMap)
         {
             FileInfo template = new FileInfo(HttpContext.Current.Server.MapPath(@"\Content\ExcelPackageTemplate.xlsx"));
-            string filename = @"\excel\" + s.GetTitle() + s.GetPuMonth() + "-" + s.GetPuDay() + s.GetCity() + ".xlsx";
+            string filename = @"\output\" + s.GetTitle() + s.GetPuMonth() + "-" + s.GetPuDay() + s.GetCity() + ".xlsx";
             FileInfo newFile = new FileInfo(HttpContext.Current.Server.MapPath(filename));
 
             using (ExcelPackage excelPackage = new ExcelPackage(newFile, template))

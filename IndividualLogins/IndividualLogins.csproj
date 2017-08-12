@@ -310,9 +310,8 @@
     <Content Include="Views\Users\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="excel\" />
     <Folder Include="Logs\" />
-    <Folder Include="pdf\" />
+    <Folder Include="output\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

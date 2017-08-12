@@ -32,7 +32,7 @@ namespace IndividualLogins.Controllers.App_Code
                 SetDocumentDetails();
 
                 PATH = HttpContext.Current.Server.MapPath("~/");
-                fileName = "\\pdf\\" + documentTitle + puMonth + "-" + puDay + city + DateTime.Now.ToString("hhmm");
+                fileName = "\\output\\" + documentTitle + puMonth + "-" + puDay + city + DateTime.Now.ToString("hhmm");
                 FileStream fs;
                 try
                 {
