@@ -115,7 +115,7 @@ namespace IndividualLogins.Controllers.App_Code
         public string ParseSeats(HtmlNode mainNode)
         {
             string seats = string.Empty;
-            string[] seatsStrgs = { ".//li[contains(@class,'result_seats')]", ".//span[contains(@class,'class mini')]", ".//li[contains(@class,'carResultRow_CarSpec_Seats')]" };
+            string[] seatsStrgs = { ".//li[contains(@class,'result_seats')]", ".//span[contains(@class,'class mini')]", ".//li[contains(@class,'carResultRow_CarSpec_Seats')]", ".//table[contains(@class,'car-spec__table')]/tr[1]/td[2]" };
             HtmlNode seatsNode = null;
             for (int i = 0; i < seatsStrgs.Count() && seatsNode == null; i++)
             {
@@ -131,7 +131,7 @@ namespace IndividualLogins.Controllers.App_Code
         {
             //transmission ------------------------------------------------
             string transm = string.Empty;
-            string[] transmStrgs = { ".//li[contains(@class,'result_trans')]", ".//span[contains(@class,'class mini')]", ".//ul[contains(@class, 'carResultRow_CarSpec-tick')]/li[2]" };
+            string[] transmStrgs = { ".//li[contains(@class,'result_trans')]", ".//span[contains(@class,'class mini')]", ".//ul[contains(@class, 'carResultRow_CarSpec-tick')]/li[2]", ".//table[contains(@class,'car-spec__table')]/tr[3]/td[4]" };
             HtmlNode transmNode = null;
             for (int i = 0; i < transmStrgs.Count() && transmNode == null; i++)
             {
