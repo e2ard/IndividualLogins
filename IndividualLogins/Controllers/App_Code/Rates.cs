@@ -61,24 +61,25 @@ namespace IndividualLogins.Controllers.App_Code
                 {
                     Dictionary<string, JOffer> map = offerMap[link];
                     List<JOffer> offers = OffersToArray(map, link);
-
+                    int colNum = 2;
                     myWorksheet.Cells[rowNum, 1].Value = s.GetPuMonth() + "-" + s.GetPuDay() + "/" + doDate.AddDays(rowNum - 1).Day + "\n" + (rowNum - 1);
                     for (int i = 0; i < offers.Count; i++)
                     {
                         myWorksheet.Row(rowNum).Height = 50;
-                        myWorksheet.Row(rowNum + 1).Height = 50;
-                        myWorksheet.Row(rowNum + 2).Height = 50;
+                        //myWorksheet.Row(rowNum + 1).Height = 50;
+                        //myWorksheet.Row(rowNum + 2).Height = 50;
 
                         JOffer o = offers.ElementAt(i);
                         SupplierNew other = o.GetOtherSupplier();
                         SupplierNew gm = o.GetGmSupplier();
                         SupplierNew cr = o.GetCrSupplier();
 
-                        myWorksheet.Cells[rowNum, i + 2].Value = (gm != null ? gm.ToString() : "");
-                        myWorksheet.Cells[rowNum + 1, i + 2].Value = (cr != null ? cr.ToString() : "");
-                        myWorksheet.Cells[rowNum + 2, i + 2].Value = (other != null ? other.ToString() : "");
+                        myWorksheet.Cells[rowNum, colNum].Value = (gm != null ? gm.ToString() : "");
+                        myWorksheet.Cells[rowNum, colNum + 1].Value = (cr != null ? cr.ToString() : "");
+                        myWorksheet.Cells[rowNum, colNum + 2].Value = (other != null ? other.ToString() : "");
+                        colNum += 3;
                     }
-                    rowNum += 3;
+                    rowNum ++;
                 }
                 excelPackage.Save();// Saving the change...
                 return filename;
