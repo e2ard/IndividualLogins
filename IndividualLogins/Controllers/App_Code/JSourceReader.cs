@@ -197,7 +197,7 @@ namespace IndividualLogins.Controllers.App_Code
             foreach (SupplierNew o in offers)
             {
                 string offerKey = o.Category + o.Transmission;
-                if (offerKey.Equals("People CarrierM") && !o.Seats.Equals("9") || o.Category.Contains("skip"))
+                if ((offerKey.Equals("People CarrierM") && o.Seats != 9) || o.Category.Contains("skip"))
                 {
                     AddCar(o);
                     continue;
