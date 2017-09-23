@@ -115,7 +115,7 @@ namespace IndividualLogins.Controllers.App_Code
         public string ParseSeats(HtmlNode mainNode)
         {
             string seats = string.Empty;
-            string[] seatsStrgs = { ".//li[contains(@class,'result_seats')]", ".//span[contains(@class,'class mini')]", ".//li[contains(@class,'carResultRow_CarSpec_Seats')]", ".//table[contains(@class,'car-spec__table')]/tr[1]/td[2]" };
+            string[] seatsStrgs = { ".//li[contains(@class,'result_seats')]", ".//span[contains(@class,'class mini')]", ".//li[contains(@class,'carResultRow_CarSpec_Seats')]", ".//table[contains(@class,'car-spec__table')]/tr[1]/td[2]", ".//ul[contains(@class,'carResultRow_CarSpec-strong')]/li[1]" };
             HtmlNode seatsNode = null;
             for (int i = 0; i < seatsStrgs.Count() && seatsNode == null; i++)
             {
