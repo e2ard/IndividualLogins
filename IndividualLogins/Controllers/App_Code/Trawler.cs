@@ -82,6 +82,10 @@ namespace IndividualLogins.Controllers.App_Code
                     return "Gdansk";
                 case "4220":
                     return "Katowice";
+                case "3200":
+                    return "Poznan";
+                case "2477":
+                    return "Athens";
             }
             return "Unknown";
         }

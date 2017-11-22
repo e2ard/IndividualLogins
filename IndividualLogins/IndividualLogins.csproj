@@ -246,6 +246,7 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Properties\PublishProfiles\Greece.pubxml" />
     <None Include="Properties\PublishProfiles\Production.pubxml" />
     <None Include="Properties\PublishProfiles\TestEnvironment.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />

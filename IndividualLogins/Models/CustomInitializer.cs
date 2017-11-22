@@ -28,6 +28,7 @@ namespace IndividualLogins.Models
             locations.Add(new Location { LocationId = 11, Name = "Krakow", IsAvailable = true });
             locations.Add(new Location { LocationId = 12, Name = "Gdansk", IsAvailable = true });
             locations.Add(new Location { LocationId = 13, Name = "Katowice", IsAvailable = true });
+            locations.Add(new Location { LocationId = 14, Name = "Athens", IsAvailable = true });
 
             context.Locations.AddRange(locations);
 

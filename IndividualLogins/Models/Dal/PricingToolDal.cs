@@ -11,7 +11,7 @@ namespace IndividualLogins.Models.Dal
         {
             return new SelectList(new List<SelectListItem>{
                   new SelectListItem{ Selected = false,Text = "RentalCars", Value = "1"},
-                  new SelectListItem {Selected = false, Text = "CarsTrawler", Value = "2"},
+                  new SelectListItem {Selected = false, Text = "CarTrawler", Value = "2"},
                   new SelectListItem {Selected = false, Text = "CarScanner", Value = "3"},
                   //new SelectListItem {Selected = false, Text = "EcoBookings", Value = "4"},
                   //new SelectListItem {Selected = false, Text = "Expedia", Value = "5"}

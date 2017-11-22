@@ -123,6 +123,31 @@ namespace IndividualLogins
             {
                 var result1 = UserManager.AddToRole(userInit.Id, "Preview");
             }
+
+
+            userInit = new ApplicationUser();
+            userInit.UserName = "modlin";
+            userInit.Email = "modlin@pricingtool.eu";
+            userInitPwd = "Modlin112.";
+            chkUser = UserManager.Create(userInit, userInitPwd);
+
+            //Add default User to Role Preview   
+            if (chkUser.Succeeded)
+            {
+                var result1 = UserManager.AddToRole(userInit.Id, "Preview");
+            }
+
+            userInit = new ApplicationUser();
+            userInit.UserName = "athens";
+            userInit.Email = "athens@pricingtool.eu";
+            userInitPwd = "Athens112.";
+            chkUser = UserManager.Create(userInit, userInitPwd);
+
+            //Add default User to Role Preview   
+            if (chkUser.Succeeded)
+            {
+                var result1 = UserManager.AddToRole(userInit.Id, "Preview");
+            }
         }
     }
 }
