@@ -192,6 +192,7 @@
     <Compile Include="Controllers\App_Code\Expedia.cs" />
     <Compile Include="Controllers\App_Code\JOffer.cs" />
     <Compile Include="Controllers\App_Code\JSourceReader.cs" />
+    <Compile Include="Controllers\App_Code\LocationsController.cs" />
     <Compile Include="Controllers\App_Code\PdfBuilder.cs" />
     <Compile Include="Controllers\App_Code\Rates.cs" />
     <Compile Include="Controllers\App_Code\Rental.cs" />
@@ -309,6 +310,11 @@
     <Content Include="Views\Users\Details.cshtml" />
     <Content Include="Views\Users\Edit.cshtml" />
     <Content Include="Views\Users\Index.cshtml" />
+    <Content Include="Views\Locations\Create.cshtml" />
+    <Content Include="Views\Locations\Delete.cshtml" />
+    <Content Include="Views\Locations\Details.cshtml" />
+    <Content Include="Views\Locations\Edit.cshtml" />
+    <Content Include="Views\Locations\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Logs\" />

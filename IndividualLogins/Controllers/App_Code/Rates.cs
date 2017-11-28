@@ -126,8 +126,13 @@ namespace IndividualLogins.Controllers.App_Code
             Log.Instance.Warn("---Begin: GetRentalRates");
             DateTime sDate = searchFilters.PuDate;
             DateTime eDate = searchFilters.DoDate;
-
-            Rental s = new Rental(Const.Locations[searchFilters.Location].Rental);
+            Dictionary<int, Location> locations;
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                locations = ctx.Locations.ToDictionary( loc => loc.LocationId);
+            }
+                
+            Rental s = new Rental(locations[searchFilters.Location].JigStr);
 
             s.SetTime(searchFilters.PuTime.Hours, searchFilters.PuTime.Minutes, searchFilters.DoTime.Hours, searchFilters.DoTime.Minutes);
             s.InitDate(sDate);
@@ -156,7 +161,15 @@ namespace IndividualLogins.Controllers.App_Code
         public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRates(SearchFilters searchFilters, out SiteBase site)
         {
             DateTime stime = DateTime.Now;
-            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarTrawler);
+
+            Dictionary<int, Location> locations;
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                locations = ctx.Locations.ToDictionary(loc => loc.LocationId);
+            }
+
+            Trawler s = new Trawler(locations[searchFilters.Location].CtrStr);
+
             DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
             DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
             s.InitDate(sDate);
@@ -183,9 +196,18 @@ namespace IndividualLogins.Controllers.App_Code
             return offerMap;
         }
 
+        [Obsolete]
         public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRatesSingle(SearchFilters searchFilters, out SiteBase site)
         {
-            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarTrawler);
+            Dictionary<int, Location> locations;
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                locations = ctx.Locations.ToDictionary(loc => loc.LocationId);
+            }
+
+            Trawler s = new Trawler(locations[searchFilters.Location].CtrStr);
+
+
             DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
             DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
             s.InitDate(sDate);
@@ -217,7 +239,15 @@ namespace IndividualLogins.Controllers.App_Code
 
         public Dictionary<string, Dictionary<string, JOffer>> GetScannerRates(SearchFilters searchFilters, out SiteBase site)
         {
-            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarScanner);
+            Dictionary<int, Location> locations;
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                locations = ctx.Locations.ToDictionary(loc => loc.LocationId);
+            }
+
+            Trawler s = new Trawler(locations[searchFilters.Location].SnrStr);
+
+
             DateTime sDate = searchFilters.PuDate.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
             DateTime eDate = searchFilters.DoDate.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
             s.InitDate(sDate);

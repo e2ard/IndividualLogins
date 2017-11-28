@@ -32,7 +32,8 @@ namespace IndividualLogins.Controllers.App_Code
                 SetDocumentDetails();
 
                 PATH = HttpContext.Current.Server.MapPath("~/");
-                fileName = "\\output\\" + documentTitle + puMonth + "-" + puDay + city + DateTime.Now.ToString("hhmm");
+                string fileNameDetails = documentTitle + puMonth + "-" + puDay + city + DateTime.Now.ToString("hhmm");
+                fileName = "\\output\\" + fileNameDetails.Replace("+", " ");
                 FileStream fs;
                 try
                 {

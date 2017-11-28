@@ -321,38 +321,35 @@ public class JOffer
             case "MCMR":
             case "MCMN":
             case "MDMR":
+            case "NDMR":
                 return "MiniM";
             case "EDMR":
             case "EDMN":
             case "ECMN":
             case "ECMR":
-            case "EWMR":
-            case "EWMH":
                 return "EconomyM";
             case "EDAR":
             case "ECAR":
             case "ECAN":
             case "EDAN":
-            case "EWAR":
-            case "EWAH":
                 return "EconomyA";
             case "CDMR":
             case "CCMR":
             case "CDMN":
             case "CCMN":
-            case "CWMR":
                 return "CompactM";
             case "CDAR":
             case "CCAR":
             case "CDAN":
             case "CCAN":
-            case "CWAR":
                 return "CompactA";
             case "IDMR":
             case "ICMR":
+            case "IDMD":
                 return "IntermediateM";
             case "IDAR":
             case "ICAR":
+            case "IDAD":
                 return "IntermediateA";
             case "SDMR":
             case "SCMR":
@@ -362,9 +359,15 @@ public class JOffer
                 return "StandardA";
             case "SWMR":
             case "IWMR":
+            case "EWMR":
+            case "EWMH":
+            case "CWMR":
                 return "EstateM";
             case "SWAR":
             case "IWAR":
+            case "EWAR":
+            case "EWAH":
+            case "CWAR":
                 return "EstateA";
             case "CFMR":
             case "EFMR":

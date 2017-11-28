@@ -20,11 +20,11 @@ namespace IndividualLogins.Controllers.App_Code
 
     public class JSourceReader
     {
-        public string ipStr;// = "lv2.nordvpn.com";//"193.105.240.1";
-        public int port;// = 80;//8080
-        public bool addProxy;// = true;//if true then add
-        public string user;// = "edvard.naus@gmail.com";
-        public string pass;// = "421c3421c3";
+        public string ipStr;
+        public int port;
+        public bool addProxy;
+        public string user;
+        public string pass;
         
         public JSourceReader() {
             Configuration config = WebConfigurationManager.OpenWebConfiguration("/");
@@ -87,8 +87,8 @@ namespace IndividualLogins.Controllers.App_Code
                     string carName = ParseCarname(mainNode);
 
                     SupplierNew o = new SupplierNew(supplier, price, category, transm, seats, carName);
-                    if (carName.ToLower().Contains("renault clio estate") && o.Transmission.Equals("A"))
-                        o.Category = "Economy";
+                    //if (carName.ToLower().Contains("renault clio estate") && o.Transmission.Equals("A"))
+                    //    o.Category = "Economy";
                     offers.Add(o);
                 }
             }
@@ -124,7 +124,7 @@ namespace IndividualLogins.Controllers.App_Code
                     return seatsNode.InnerText;
             }
             if (seatsNode == null)
-                Debug.WriteLine("-------------> seats not pursed");
+                Debug.WriteLine("-------ParseSeats------> seats not pursed");
             return null;
         }
         public string ParseTransm(HtmlNode mainNode)
