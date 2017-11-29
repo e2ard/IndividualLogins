@@ -44,6 +44,9 @@ namespace IndividualLogins.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public bool IsAvailable { get; set; }
+        public string JigStr { get; internal set; }
+        public string CtrStr { get; internal set; }
+        public string SnrStr { get; internal set; }
     }
 
     public class News

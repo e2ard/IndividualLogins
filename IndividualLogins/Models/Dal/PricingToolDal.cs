@@ -58,6 +58,16 @@ namespace IndividualLogins.Models.Dal
             return new SelectList(sl, "Value", "Text");
         }
 
+        public List<Location> GetLocationsList()
+        {
+            using (RatesDBContext ctx = new RatesDBContext())
+            {
+                List<Location> locs = ctx.Locations.Where(s => s.IsAvailable).ToList();
+                return locs;
+            }
+            return null;
+        }
+
         //public static JsonResult GetLocations(int country)
         //{
         //    List<SelectListItem> sl = new List<SelectListItem>();

@@ -10,11 +10,13 @@ using OfficeOpenXml;
 using static JOffer;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using IndividualLogins.Models.Dal;
 
 namespace IndividualLogins.Controllers.App_Code
 {
     public class Rates
     {
+        PricingToolDal dal = new PricingToolDal();
         public string GetPdfLocation(SiteBase s, SearchFilters sf)
         {
             Log.Instance.Info("---Begin: GetPdfLocation");
@@ -120,14 +122,14 @@ namespace IndividualLogins.Controllers.App_Code
             return offers;
         }
 
-
         public Dictionary<string, Dictionary<string, JOffer>> GetRentalRates(SearchFilters searchFilters, out SiteBase site)
         {
             Log.Instance.Warn("---Begin: GetRentalRates");
             DateTime sDate = searchFilters.PuDate;
             DateTime eDate = searchFilters.DoDate;
 
-            Rental s = new Rental(Const.Locations[searchFilters.Location].Rental);
+            Dictionary<int, Location> Locations = dal.GetLocationsList().ToDictionary(item => item.LocationId);
+            Rental s = new Rental(Locations[searchFilters.Location].JigStr);
 
             s.SetTime(searchFilters.PuTime.Hours, searchFilters.PuTime.Minutes, searchFilters.DoTime.Hours, searchFilters.DoTime.Minutes);
             s.InitDate(sDate);
@@ -156,7 +158,8 @@ namespace IndividualLogins.Controllers.App_Code
         public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRates(SearchFilters searchFilters, out SiteBase site)
         {
             DateTime stime = DateTime.Now;
-            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarTrawler);
+            Dictionary<int, Location> Locations = dal.GetLocationsList().ToDictionary(item => item.LocationId);
+            Trawler s = new Trawler(Locations[searchFilters.Location].CtrStr);
             DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
             DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
             s.InitDate(sDate);
@@ -183,41 +186,46 @@ namespace IndividualLogins.Controllers.App_Code
             return offerMap;
         }
 
-        public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRatesSingle(SearchFilters searchFilters, out SiteBase site)
-        {
-            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarTrawler);
-            DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
-            DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
-            s.InitDate(sDate);
+        //public Dictionary<string, Dictionary<string, JOffer>> GetCarTrawlerRatesSingle(SearchFilters searchFilters, out SiteBase site)
+        //{
+        //    Dictionary<int, Location> Locations = dal.GetLocationsList().ToDictionary(item => item.LocationId);
 
-            int numOfIterations = (eDate - sDate).Days;
+        //    Trawler s = new Trawler(Locations[searchFilters.Location].CarTrawler);
 
-            List<string> links = s.GetGeneratedLinksByDate(sDate, eDate);
-            site = s;
+        //    DateTime sDate = searchFilters.PuDate;//.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
+        //    DateTime eDate = searchFilters.DoDate;//.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
+        //    s.InitDate(sDate);
 
-            List<JOffer> minOffers = new List<JOffer>();
+        //    int numOfIterations = (eDate - sDate).Days;
 
-            Dictionary<string, Dictionary<string, JOffer>> offerMap = new Dictionary<string, Dictionary<string, JOffer>>();
+        //    List<string> links = s.GetGeneratedLinksByDate(sDate, eDate);
+        //    site = s;
 
-            for (int i = 0; i < links.Count; i++)
-                offerMap.Add(links[i], new Dictionary<string, JOffer>());
+        //    List<JOffer> minOffers = new List<JOffer>();
+
+        //    Dictionary<string, Dictionary<string, JOffer>> offerMap = new Dictionary<string, Dictionary<string, JOffer>>();
+
+        //    for (int i = 0; i < links.Count; i++)
+        //        offerMap.Add(links[i], new Dictionary<string, JOffer>());
 
 
-            List<Thread> threads = new List<Thread>();
-            //--- Start all threads
-            for (int index = 0; index < links.Count; index++)
-            {
-                JSourceReader reader = new JSourceReader();
-                offerMap[links.ElementAt(index)] =
-                        reader.GetMap(reader.GetNorwRates(links.ElementAt(index)));
-            }
+        //    List<Thread> threads = new List<Thread>();
+        //    //--- Start all threads
+        //    for (int index = 0; index < links.Count; index++)
+        //    {
+        //        JSourceReader reader = new JSourceReader();
+        //        offerMap[links.ElementAt(index)] =
+        //                reader.GetMap(reader.GetNorwRates(links.ElementAt(index)));
+        //    }
 
-            return offerMap;
-        }
+        //    return offerMap;
+        //}
 
         public Dictionary<string, Dictionary<string, JOffer>> GetScannerRates(SearchFilters searchFilters, out SiteBase site)
         {
-            Trawler s = new Trawler(Const.Locations[searchFilters.Location].CarScanner);
+            Dictionary<int, Location> Locations = dal.GetLocationsList().ToDictionary(item => item.LocationId);
+
+            Trawler s = new Trawler(Locations[searchFilters.Location].SnrStr);
             DateTime sDate = searchFilters.PuDate.AddHours(searchFilters.PuTime.Hours).AddMinutes(searchFilters.PuTime.Minutes);
             DateTime eDate = searchFilters.DoDate.AddHours(searchFilters.DoTime.Hours).AddMinutes(searchFilters.DoTime.Minutes);
             s.InitDate(sDate);

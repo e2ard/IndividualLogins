@@ -101,7 +101,7 @@ public class JOffer
     public float GetMinPrice()
     {
         SupplierNew s = Suppliers.OrderBy(t => t.Price).FirstOrDefault(s1 => s1.SupplierType == 4 && s1.Price > 0);
-        return s != null? s.Price: 0;
+        return s != null ? s.Price : 0;
     }
 
     private SupplierNew GetByTypeSupplier(int type)
@@ -293,7 +293,7 @@ public class JOffer
             }
             return output;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return null;
         }
@@ -469,9 +469,11 @@ public class JOffer
                     return "CompactA";
                 case "IDMR":
                 case "ICMR":
+                case "IDMD":
                     return "IntermediateM";
                 case "IDAR":
                 case "ICAR":
+                case "IDAD":
                     return "IntermediateA";
                 case "SDMR":
                 case "SCMR":
@@ -515,7 +517,7 @@ public class JOffer
 
         private string ParseTransmission(string transm)
         {
-            return string.IsNullOrEmpty(transm)? "": transm.Trim().Split(' ')[0].Substring(0, 1);
+            return string.IsNullOrEmpty(transm) ? "" : transm.Trim().Split(' ')[0].Substring(0, 1);
         }
         private float ParsePrice(string price)
         {
