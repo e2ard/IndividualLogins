@@ -101,7 +101,7 @@ public class JOffer
     public float GetMinPrice()
     {
         SupplierNew s = Suppliers.OrderBy(t => t.Price).FirstOrDefault(s1 => s1.SupplierType == 4 && s1.Price > 0);
-        return s != null? s.Price: 0;
+        return s != null ? s.Price : 0;
     }
 
     private SupplierNew GetByTypeSupplier(int type)
@@ -293,7 +293,7 @@ public class JOffer
             }
             return output;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return null;
         }
@@ -321,35 +321,38 @@ public class JOffer
             case "MCMR":
             case "MCMN":
             case "MDMR":
-            case "NDMR":
                 return "MiniM";
             case "EDMR":
             case "EDMN":
             case "ECMN":
             case "ECMR":
+            case "EWMR":
+            case "EWMH":
                 return "EconomyM";
             case "EDAR":
             case "ECAR":
             case "ECAN":
             case "EDAN":
+            case "EWAR":
+            case "EWAH":
                 return "EconomyA";
             case "CDMR":
             case "CCMR":
             case "CDMN":
             case "CCMN":
+            case "CWMR":
                 return "CompactM";
             case "CDAR":
             case "CCAR":
             case "CDAN":
             case "CCAN":
+            case "CWAR":
                 return "CompactA";
             case "IDMR":
             case "ICMR":
-            case "IDMD":
                 return "IntermediateM";
             case "IDAR":
             case "ICAR":
-            case "IDAD":
                 return "IntermediateA";
             case "SDMR":
             case "SCMR":
@@ -359,15 +362,9 @@ public class JOffer
                 return "StandardA";
             case "SWMR":
             case "IWMR":
-            case "EWMR":
-            case "EWMH":
-            case "CWMR":
                 return "EstateM";
             case "SWAR":
             case "IWAR":
-            case "EWAR":
-            case "EWAH":
-            case "CWAR":
                 return "EstateA";
             case "CFMR":
             case "EFMR":
@@ -518,7 +515,7 @@ public class JOffer
 
         private string ParseTransmission(string transm)
         {
-            return string.IsNullOrEmpty(transm)? "": transm.Trim().Split(' ')[0].Substring(0, 1);
+            return string.IsNullOrEmpty(transm) ? "" : transm.Trim().Split(' ')[0].Substring(0, 1);
         }
         private float ParsePrice(string price)
         {
